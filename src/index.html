@@ -20,11 +20,16 @@
       <p>Please pick your Game</p>
 
       <form class="row" id="greet-form">
-        <input id="greet-input" placeholder="Enter a name..." />
-        <button type="submit">Greet</button>
+        <div>
+          <input type="radio" value="white" name="color" checked>
+          <label for="white">White</label>
+        </div>
+        <div>
+          <input type="radio" value="black" name="color">
+          <label for="black">Black</label>
+        </div>
+        <button type="submit">Play!</button>
       </form>
-
-      <p id="greet-msg"></p>
     </div>
   </body>
 </html>
