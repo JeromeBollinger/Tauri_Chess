@@ -1,5 +1,5 @@
-const canvas_length = 320;
-const rect_length = canvas_length/8;
+var canvas_length = window.screen.height/2;
+var rect_length = canvas_length/8;
 
 
 function fill_board(){
