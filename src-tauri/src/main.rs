@@ -98,6 +98,17 @@ struct Figure {
     alive: bool,
 }
 
+impl Figure {
+    fn new(kind: FigureType, position: Position, white: bool) -> Figure {
+        Figure {
+            kind,
+            position,
+            white,
+            alive: true,
+        }
+    }
+}
+
 struct Position {
     x: i32,
     y: i32,
@@ -109,5 +120,38 @@ impl Position {
     }
 }
 
+struct Board {
+    figures: Vec<Figure>,
+    round: i32,
 }
 
+impl Board {
+    fn init() -> Board {
+        let mut fig: Vec<Figure> = vec![
+            Figure::new(FigureType::Rook, Position::new(0, 0), true),
+            Figure::new(FigureType::Knight, Position::new(1, 0), true),
+            Figure::new(FigureType::Bishop, Position::new(2, 0), true),
+            Figure::new(FigureType::Queen, Position::new(3, 0), true),
+            Figure::new(FigureType::King, Position::new(4, 0), true),
+            Figure::new(FigureType::Bishop, Position::new(5, 0), true),
+            Figure::new(FigureType::Knight, Position::new(6, 0), true),
+            Figure::new(FigureType::Rook, Position::new(7, 0), true),
+            Figure::new(FigureType::Rook, Position::new(0, 7), false),
+            Figure::new(FigureType::Knight, Position::new(1, 7), false),
+            Figure::new(FigureType::Bishop, Position::new(2, 7), false),
+            Figure::new(FigureType::Queen, Position::new(3, 7), false),
+            Figure::new(FigureType::King, Position::new(4, 7), false),
+            Figure::new(FigureType::Bishop, Position::new(5, 7), false),
+            Figure::new(FigureType::Knight, Position::new(6, 7), false),
+            Figure::new(FigureType::Rook, Position::new(7, 7), false),
+        ];
+        for i in 0..7 {
+            fig.push(Figure::new(FigureType::Pawn, Position::new(i, 1), true));
+            fig.push(Figure::new(FigureType::Pawn, Position::new(i, 6), false));
+        }
+        Board {
+            round: 0,
+            figures: fig,
+        }
+    }
+}
