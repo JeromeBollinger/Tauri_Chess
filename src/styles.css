@@ -107,3 +107,10 @@ button {
     background-color: #0f0f0f69;
   }
 }
+
+.board {
+  border: 1px solid black;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+}
