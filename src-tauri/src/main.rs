@@ -62,31 +62,55 @@ impl Figure {
                     pos.push(Position::new(self.position.x, self.position.y - distance));
                 }
                 pos
-            },
+            }
             FigureType::Bishop => {
                 let mut pos: Vec<Position> = vec![];
                 for distance in 1..7 {
-                    pos.push(Position::new(self.position.x + distance, self.position.y + distance));
-                    pos.push(Position::new(self.position.x - distance, self.position.y - distance));
-                    pos.push(Position::new(self.position.x - distance, self.position.y + distance));
-                    pos.push(Position::new(self.position.x + distance, self.position.y - distance));
+                    pos.push(Position::new(
+                        self.position.x + distance,
+                        self.position.y + distance,
+                    ));
+                    pos.push(Position::new(
+                        self.position.x - distance,
+                        self.position.y - distance,
+                    ));
+                    pos.push(Position::new(
+                        self.position.x - distance,
+                        self.position.y + distance,
+                    ));
+                    pos.push(Position::new(
+                        self.position.x + distance,
+                        self.position.y - distance,
+                    ));
                 }
                 pos
-            },
+            }
             FigureType::Queen => {
                 let mut pos: Vec<Position> = vec![];
                 for distance in 1..7 {
-                    pos.push(Position::new(self.position.x + distance, self.position.y + distance));
-                    pos.push(Position::new(self.position.x - distance, self.position.y - distance));
-                    pos.push(Position::new(self.position.x - distance, self.position.y + distance));
-                    pos.push(Position::new(self.position.x + distance, self.position.y - distance));
+                    pos.push(Position::new(
+                        self.position.x + distance,
+                        self.position.y + distance,
+                    ));
+                    pos.push(Position::new(
+                        self.position.x - distance,
+                        self.position.y - distance,
+                    ));
+                    pos.push(Position::new(
+                        self.position.x - distance,
+                        self.position.y + distance,
+                    ));
+                    pos.push(Position::new(
+                        self.position.x + distance,
+                        self.position.y - distance,
+                    ));
                     pos.push(Position::new(self.position.x + distance, self.position.y));
                     pos.push(Position::new(self.position.x - distance, self.position.y));
                     pos.push(Position::new(self.position.x, self.position.y + distance));
                     pos.push(Position::new(self.position.x, self.position.y - distance));
                 }
                 pos
-            },
+            }
         }
     }
 }
