@@ -27,7 +27,7 @@ impl Figure {
     fn movable(&self) -> Vec<Position> {
         match &self.kind {
             FigureType::Pawn => {
-                if self.color.white {
+                if self.white {
                     vec![Position::new(self.position.x, self.position.y + 1)]
                 } else {
                     vec![Position::new(self.position.x, self.position.y + 1)]
@@ -94,7 +94,7 @@ impl Figure {
 struct Figure {
     kind: FigureType,
     position: Position,
-    color: Color,
+    white: bool,
     alive: bool,
 }
 
@@ -109,7 +109,5 @@ impl Position {
     }
 }
 
-struct Color {
-    white: bool,
 }
 
