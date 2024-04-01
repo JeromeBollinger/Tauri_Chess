@@ -45,7 +45,7 @@ impl Figure {
                 if self.white {
                     vec![Position::new(self.position.x, self.position.y + 1)]
                 } else {
-                    vec![Position::new(self.position.x, self.position.y + 1)]
+                    vec![Position::new(self.position.x, self.position.y - 1)]
                 }
             }
             FigureType::King => vec![
