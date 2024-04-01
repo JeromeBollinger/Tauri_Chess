@@ -30,17 +30,25 @@ async function getBoard() {
     return figures;
 }
 
+let figureShapes
+
 window.addEventListener("load", () => {
     getBoard().then(
         board => {
-            var figure_shapes = drawFigures(board);
+            figureShapes = drawFigures(board);
         }).catch( error =>
             console.log(error, "could not fetch board!!! ")
     )
 });
 
+
 canva.addEventListener('click', e => {
-    console.log(e);
+    let canvas = canva.getContext("2d");
+    figureShapes.forEach((figureShape) => {
+        if (canvas.isPointInPath(figureShape.shape, e.offsetX, e.offsetY)) {
+            console.log(figureShape.object.kind)
+        }
+    })
 })
 
 function drawFigures(board){
