@@ -15,9 +15,15 @@ fn get_board() -> Board {
     board
 }
 
+#[tauri::command]
+fn get_options(figure_id: i32) -> Vec<Position> {
+    let board = Board::init();
+    board.get_figure_from_id(figure_id).movable()
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet, get_board])
+        .invoke_handler(tauri::generate_handler![greet, get_board, get_options])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -191,5 +197,14 @@ impl Board {
             round: 0,
             figures: fig,
         }
+    }
+
+    fn get_figure_from_id(&self, id: i32) -> &Figure {
+        for figure in &self.figures {
+            if figure.id == id {
+                return &figure;
+            }
+        }
+        &self.figures[0] // This case should never happen
     }
 }

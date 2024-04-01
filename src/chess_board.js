@@ -41,14 +41,27 @@ window.addEventListener("load", () => {
     )
 });
 
+async function getOptions(figureId){
+    let options = await invoke("get_options", { "figureId": figureId });
+    return options;
+}
 
 canva.addEventListener('click', e => {
     let canvas = canva.getContext("2d");
+    let figureId;
     figureShapes.forEach((figureShape) => {
         if (canvas.isPointInPath(figureShape.shape, e.offsetX, e.offsetY)) {
             console.log(figureShape.object)
+            figureId = figureShape.object.id;
         }
     })
+    getOptions(figureId).then(
+        options => {
+            var optionShapes = drawOptions(options)
+        }
+    ).catch( error =>
+        console.log(error, "could not fetch options")
+    );
 })
 
 function drawFigures(board){
@@ -69,4 +82,21 @@ function drawFigure(figure) {
     canvas.font = "12px serif";
     canvas.fillText(figure.kind, figure.position.x * rect_length + rect_length / 4, figure.position.y * rect_length + rect_length / 2 + 5);
     return {"shape": circle, "object": figure};
+}
+
+function drawOptions(options){
+    var optionShapes = [];
+    options.forEach((option) => {
+        optionShapes.push(drawOption(option));
+    });
+    return optionShapes;
+}
+
+function drawOption(option) {
+    let canvas = canva.getContext("2d");
+    canvas.fillStyle = "orange"
+    let circle = new Path2D();
+    circle.arc(option.x * rect_length + rect_length / 2, option.y * rect_length + rect_length / 2, rect_length / 5, 0, 2 * Math.PI);
+    canvas.fill(circle);
+    return {"shape": circle, "object": option};
 }
