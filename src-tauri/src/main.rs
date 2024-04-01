@@ -70,7 +70,7 @@ impl Figure {
             ],
             FigureType::Rook => {
                 let mut pos: Vec<Position> = vec![];
-                for distance in 1..7 {
+                for distance in 1..8 {
                     pos.push(Position::new(self.position.x + distance, self.position.y));
                     pos.push(Position::new(self.position.x - distance, self.position.y));
                     pos.push(Position::new(self.position.x, self.position.y + distance));
@@ -80,7 +80,7 @@ impl Figure {
             }
             FigureType::Bishop => {
                 let mut pos: Vec<Position> = vec![];
-                for distance in 1..7 {
+                for distance in 1..8 {
                     pos.push(Position::new(
                         self.position.x + distance,
                         self.position.y + distance,
@@ -102,7 +102,7 @@ impl Figure {
             }
             FigureType::Queen => {
                 let mut pos: Vec<Position> = vec![];
-                for distance in 1..7 {
+                for distance in 1..8 {
                     pos.push(Position::new(
                         self.position.x + distance,
                         self.position.y + distance,
