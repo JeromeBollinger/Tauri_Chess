@@ -1,14 +1,14 @@
 const { invoke } = window.__TAURI__.tauri;
+const canva = document.getElementById("board");
 
 var canvas_length = window.screen.height/2;
 var rect_length = canvas_length/8;
 
 
 function fill_board(){
-    let c = document.getElementById('board');
-    c.width = canvas_length;
-    c.height = canvas_length;
-    let canvas = document.getElementById('board').getContext("2d");
+    canva.width = canvas_length;
+    canva.height = canvas_length;
+    let canvas = canva.getContext("2d");
     let n = 0;
     for (let x = 0; x <= 8; x++) {
         for (let y = 0; y <= 8; y++) {
@@ -45,7 +45,7 @@ window.addEventListener("load", () => {
 });
 
 function drawFigure(figures) {
-    let canvas = document.getElementById('board').getContext("2d");
+    let canvas = canva.getContext("2d");
     canvas.fillStyle = "yellow"
     let circle = new Path2D();
     circle.arc(figures.position.x * rect_length + rect_length / 2, figures.position.y * rect_length + rect_length / 2, rect_length / 2.5, 0, 2 * Math.PI);
