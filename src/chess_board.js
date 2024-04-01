@@ -23,14 +23,12 @@ function fill_board(){
     }
 }
 
-document.addEventListener("load", fill_board());
-
 async function getBoard() {
     let figures = await invoke("get_board");
     return figures;
 }
 
-let figureShapes
+let figureShapes = [];
 
 window.addEventListener("load", () => {
     getBoard().then(
@@ -64,12 +62,10 @@ canva.addEventListener('click', e => {
     );
 })
 
-function drawFigures(board){
-    var figureShapes = [];
+function drawFigures(board) {
     board.figures.forEach((figure) => {
         figureShapes.push(drawFigure(figure));
     });
-    return figureShapes;
 }
 
 function drawFigure(figure) {
@@ -99,4 +95,13 @@ function drawOption(option) {
     circle.arc(option.x * rect_length + rect_length / 2, option.y * rect_length + rect_length / 2, rect_length / 5, 0, 2 * Math.PI);
     canvas.fill(circle);
     return {"shape": circle, "object": option};
+
+function clearBoard() {
+    canva.getContext("2d").clearRect(0, 0, canva.width, canva.height);
+}
+
+function redrawBoard(board) {
+    clearBoard();
+    fillBoard();
+    drawFigures(board)
 }
