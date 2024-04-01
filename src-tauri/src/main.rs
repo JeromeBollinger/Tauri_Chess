@@ -169,7 +169,7 @@ impl Board {
             Figure::new(FigureType::Knight, Position::new(6, 7), false),
             Figure::new(FigureType::Rook, Position::new(7, 7), false),
         ];
-        for i in 0..7 {
+        for i in 0..8 {
             fig.push(Figure::new(FigureType::Pawn, Position::new(i, 1), true));
             fig.push(Figure::new(FigureType::Pawn, Position::new(i, 6), false));
         }
