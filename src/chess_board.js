@@ -33,24 +33,32 @@ async function getBoard() {
 window.addEventListener("load", () => {
     getBoard().then(
         board => {
-            console.log(board);
-            console.log(board.figures);
-            board.figures.forEach((figure) => {
-                drawFigure(figure);
-                console.log(figure);
-            });
+            var figure_shapes = drawFigures(board);
         }).catch( error =>
             console.log(error, "could not fetch board!!! ")
     )
 });
 
-function drawFigure(figures) {
+canva.addEventListener('click', e => {
+    console.log(e);
+})
+
+function drawFigures(board){
+    var figureShapes = [];
+    board.figures.forEach((figure) => {
+        figureShapes.push(drawFigure(figure));
+    });
+    return figureShapes;
+}
+
+function drawFigure(figure) {
     let canvas = canva.getContext("2d");
     canvas.fillStyle = "yellow"
     let circle = new Path2D();
-    circle.arc(figures.position.x * rect_length + rect_length / 2, figures.position.y * rect_length + rect_length / 2, rect_length / 2.5, 0, 2 * Math.PI);
+    circle.arc(figure.position.x * rect_length + rect_length / 2, figure.position.y * rect_length + rect_length / 2, rect_length / 2.5, 0, 2 * Math.PI);
     canvas.fill(circle);
     canvas.fillStyle = "black"
     canvas.font = "12px serif";
-    canvas.fillText(figures.kind, figures.position.x * rect_length + rect_length / 4, figures.position.y * rect_length + rect_length / 2 + 5);
+    canvas.fillText(figure.kind, figure.position.x * rect_length + rect_length / 4, figure.position.y * rect_length + rect_length / 2 + 5);
+    return {"shape": circle, "object": figure};
 }
