@@ -46,7 +46,7 @@ canva.addEventListener('click', e => {
     let canvas = canva.getContext("2d");
     figureShapes.forEach((figureShape) => {
         if (canvas.isPointInPath(figureShape.shape, e.offsetX, e.offsetY)) {
-            console.log(figureShape.object.kind)
+            console.log(figureShape.object)
         }
     })
 })

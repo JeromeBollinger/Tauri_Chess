@@ -130,15 +130,17 @@ struct Figure {
     position: Position,
     white: bool,
     alive: bool,
+    id: i32,
 }
 
 impl Figure {
-    fn new(kind: FigureType, position: Position, white: bool) -> Figure {
+    fn new(kind: FigureType, position: Position, white: bool, id: i32) -> Figure {
         Figure {
             kind,
             position,
             white,
             alive: true,
+            id,
         }
     }
 }
@@ -164,26 +166,26 @@ struct Board {
 impl Board {
     fn init() -> Board {
         let mut fig: Vec<Figure> = vec![
-            Figure::new(FigureType::Rook, Position::new(0, 0), true),
-            Figure::new(FigureType::Knight, Position::new(1, 0), true),
-            Figure::new(FigureType::Bishop, Position::new(2, 0), true),
-            Figure::new(FigureType::Queen, Position::new(3, 0), true),
-            Figure::new(FigureType::King, Position::new(4, 0), true),
-            Figure::new(FigureType::Bishop, Position::new(5, 0), true),
-            Figure::new(FigureType::Knight, Position::new(6, 0), true),
-            Figure::new(FigureType::Rook, Position::new(7, 0), true),
-            Figure::new(FigureType::Rook, Position::new(0, 7), false),
-            Figure::new(FigureType::Knight, Position::new(1, 7), false),
-            Figure::new(FigureType::Bishop, Position::new(2, 7), false),
-            Figure::new(FigureType::Queen, Position::new(3, 7), false),
-            Figure::new(FigureType::King, Position::new(4, 7), false),
-            Figure::new(FigureType::Bishop, Position::new(5, 7), false),
-            Figure::new(FigureType::Knight, Position::new(6, 7), false),
-            Figure::new(FigureType::Rook, Position::new(7, 7), false),
+            Figure::new(FigureType::Rook, Position::new(0, 0), true, 1),
+            Figure::new(FigureType::Knight, Position::new(1, 0), true, 2),
+            Figure::new(FigureType::Bishop, Position::new(2, 0), true, 3),
+            Figure::new(FigureType::Queen, Position::new(3, 0), true, 4),
+            Figure::new(FigureType::King, Position::new(4, 0), true, 5),
+            Figure::new(FigureType::Bishop, Position::new(5, 0), true, 6),
+            Figure::new(FigureType::Knight, Position::new(6, 0), true, 7),
+            Figure::new(FigureType::Rook, Position::new(7, 0), true, 8),
+            Figure::new(FigureType::Rook, Position::new(0, 7), false, 9),
+            Figure::new(FigureType::Knight, Position::new(1, 7), false, 10),
+            Figure::new(FigureType::Bishop, Position::new(2, 7), false, 11),
+            Figure::new(FigureType::Queen, Position::new(3, 7), false, 12),
+            Figure::new(FigureType::King, Position::new(4, 7), false, 13),
+            Figure::new(FigureType::Bishop, Position::new(5, 7), false, 14),
+            Figure::new(FigureType::Knight, Position::new(6, 7), false, 15),
+            Figure::new(FigureType::Rook, Position::new(7, 7), false, 16),
         ];
         for i in 0..8 {
-            fig.push(Figure::new(FigureType::Pawn, Position::new(i, 1), true));
-            fig.push(Figure::new(FigureType::Pawn, Position::new(i, 6), false));
+            fig.push(Figure::new(FigureType::Pawn, Position::new(i, 1), true, i + 17));
+            fig.push(Figure::new(FigureType::Pawn, Position::new(i, 6), false, i + 25));
         }
         Board {
             round: 0,
