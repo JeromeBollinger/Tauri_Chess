@@ -29,6 +29,7 @@ async function getBoard() {
 }
 
 let figureShapes = [];
+let optionShapes = [];
 
 window.addEventListener("load", () => {
     getBoard().then(
@@ -55,7 +56,7 @@ canva.addEventListener('click', e => {
     })
     getOptions(figureId).then(
         options => {
-            var optionShapes = drawOptions(options)
+            optionShapes = drawOptions(options)
         }
     ).catch(error =>
         console.log(error, "could not fetch options")
