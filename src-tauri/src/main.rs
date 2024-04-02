@@ -2,6 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use serde::Serialize;
+use std::sync::Mutex;
+use tauri::State;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -10,25 +12,26 @@ fn greet(name: &str) -> String {
 }
 
 #[tauri::command]
-fn get_board() -> Board {
-    let board = Board::init();
-    board
+fn get_board(game: State<Game>) -> Board {
+    let a = game.0.lock().unwrap().clone();
+    a
 }
 
 #[tauri::command]
-fn get_options(figure_id: i32) -> Vec<Position> {
-    let board = Board::init();
+fn get_options(game: State<Game>, figure_id: i32) -> Vec<Position> {
+    let board = game.0.lock().unwrap().clone();
     board.get_figure_from_id(figure_id).movable()
 }
 
 fn main() {
     tauri::Builder::default()
+        .manage(Game::init())
         .invoke_handler(tauri::generate_handler![greet, get_board, get_options])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 enum FigureType {
     Pawn,
     King,
@@ -138,7 +141,7 @@ impl Figure {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 struct Figure {
     kind: FigureType,
     position: Position,
@@ -161,7 +164,7 @@ impl Figure {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 struct Position {
     x: i32,
     y: i32,
@@ -174,6 +177,15 @@ impl Position {
 }
 
 #[derive(Serialize)]
+struct Game(Mutex<Board>);
+
+impl  Game {
+    fn init() -> Self {
+        Game (Mutex::new(Board::init()))
+    }
+}
+
+#[derive(Serialize, Clone)]
 struct Board {
     figures: Vec<Figure>,
     round: i32,
