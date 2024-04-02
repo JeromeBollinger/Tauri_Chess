@@ -1,5 +1,9 @@
 # Tauri_Chess
 
+The goal of this project is to create a Chess game with Tauri. This is meant as an exercise to better understand Rust
+and serves also as my first multi-platform application.
+
+
 ## Project initialization
 
 ### Installation
@@ -25,3 +29,7 @@ Run:
 ```
 cargo tauri dev
 ```
+
+## Licenses
+Note that this project uses the unlicense whereas the dependencies might use different
+licenses. [Tauri](https://github.com/tauri-apps/tauri?tab=readme-ov-file#licenses) uses MIT or MIT/Apache 2.0 License.
