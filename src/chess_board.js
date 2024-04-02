@@ -32,12 +32,7 @@ let figureShapes = [];
 let optionShapes = [];
 
 window.addEventListener("load", () => {
-    getBoard().then(
-        board => {
-            redrawBoard(board)
-        }).catch(error =>
-            console.log(error, "could not fetch board!!! ")
-        )
+    redrawBoard()
 });
 
 async function getOptions(figureId) {
@@ -102,8 +97,18 @@ function clearBoard() {
     canva.getContext("2d").clearRect(0, 0, canva.width, canva.height);
 }
 
-function redrawBoard(board) {
+function clearShapes() {
+    figureShapes = []
+}
+
+function redrawBoard() {
     clearBoard();
+    clearShapes();
     fillBoard();
-    drawFigures(board)
+    getBoard().then(
+        board => {
+            drawFigures(board)
+        }).catch(error =>
+            console.log(error, "could not fetch board!!! ")
+        )
 }
