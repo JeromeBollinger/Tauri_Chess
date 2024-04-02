@@ -179,9 +179,9 @@ impl Position {
 #[derive(Serialize)]
 struct Game(Mutex<Board>);
 
-impl  Game {
+impl Game {
     fn init() -> Self {
-        Game (Mutex::new(Board::init()))
+        Game(Mutex::new(Board::init()))
     }
 }
 
