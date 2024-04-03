@@ -31,7 +31,12 @@ fn get_options(game: State<Game>, figure_id: i32) -> MoveOptions {
 fn main() {
     tauri::Builder::default()
         .manage(Game::init())
-        .invoke_handler(tauri::generate_handler![greet, get_board, get_options, set_player_color])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            get_board,
+            get_options,
+            set_player_color
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
@@ -62,28 +67,32 @@ impl Figure {
                         options.push(Position::new(self.position.x, self.position.y - 2));
                     }
                 }
-                MoveOptions {positions: options}
+                MoveOptions { positions: options }
             }
-            FigureType::King => MoveOptions {positions: vec![
-                Position::new(self.position.x - 1, self.position.y),
-                Position::new(self.position.x - 1, self.position.y + 1),
-                Position::new(self.position.x, self.position.y + 1),
-                Position::new(self.position.x + 1, self.position.y + 1),
-                Position::new(self.position.x + 1, self.position.y),
-                Position::new(self.position.x + 1, self.position.y - 1),
-                Position::new(self.position.x, self.position.y - 1),
-                Position::new(self.position.x - 1, self.position.y - 1),
-            ]},
-            FigureType::Knight => MoveOptions {positions: vec![
-                Position::new(self.position.x - 2, self.position.y + 1),
-                Position::new(self.position.x - 1, self.position.y + 2),
-                Position::new(self.position.x + 1, self.position.y + 2),
-                Position::new(self.position.x + 2, self.position.y + 1),
-                Position::new(self.position.x + 1, self.position.y - 2),
-                Position::new(self.position.x + 2, self.position.y - 1),
-                Position::new(self.position.x - 2, self.position.y - 1),
-                Position::new(self.position.x - 1, self.position.y - 2),
-            ]},
+            FigureType::King => MoveOptions {
+                positions: vec![
+                    Position::new(self.position.x - 1, self.position.y),
+                    Position::new(self.position.x - 1, self.position.y + 1),
+                    Position::new(self.position.x, self.position.y + 1),
+                    Position::new(self.position.x + 1, self.position.y + 1),
+                    Position::new(self.position.x + 1, self.position.y),
+                    Position::new(self.position.x + 1, self.position.y - 1),
+                    Position::new(self.position.x, self.position.y - 1),
+                    Position::new(self.position.x - 1, self.position.y - 1),
+                ],
+            },
+            FigureType::Knight => MoveOptions {
+                positions: vec![
+                    Position::new(self.position.x - 2, self.position.y + 1),
+                    Position::new(self.position.x - 1, self.position.y + 2),
+                    Position::new(self.position.x + 1, self.position.y + 2),
+                    Position::new(self.position.x + 2, self.position.y + 1),
+                    Position::new(self.position.x + 1, self.position.y - 2),
+                    Position::new(self.position.x + 2, self.position.y - 1),
+                    Position::new(self.position.x - 2, self.position.y - 1),
+                    Position::new(self.position.x - 1, self.position.y - 2),
+                ],
+            },
             FigureType::Rook => {
                 let mut pos: Vec<Position> = vec![];
                 for distance in 1..8 {
@@ -92,7 +101,7 @@ impl Figure {
                     pos.push(Position::new(self.position.x, self.position.y + distance));
                     pos.push(Position::new(self.position.x, self.position.y - distance));
                 }
-                MoveOptions {positions: pos}
+                MoveOptions { positions: pos }
             }
             FigureType::Bishop => {
                 let mut pos: Vec<Position> = vec![];
@@ -114,7 +123,7 @@ impl Figure {
                         self.position.y - distance,
                     ));
                 }
-                MoveOptions {positions: pos}
+                MoveOptions { positions: pos }
             }
             FigureType::Queen => {
                 let mut pos: Vec<Position> = vec![];
@@ -140,7 +149,7 @@ impl Figure {
                     pos.push(Position::new(self.position.x, self.position.y + distance));
                     pos.push(Position::new(self.position.x, self.position.y - distance));
                 }
-                MoveOptions {positions: pos}
+                MoveOptions { positions: pos }
             }
         }
     }
@@ -171,7 +180,9 @@ impl Figure {
 
 #[derive(Serialize, Clone, Debug, PartialEq)]
 struct MoveOptions {
-    positions: Vec<Position>
+    positions: Vec<Position>,
+}
+
 impl MoveOptions {
     fn remove_out_of_bounds_options(mut self) -> Self{
         let allowed_range = 0..8;
@@ -279,10 +290,14 @@ mod tests {
     #[test]
     fn pawn_test() {
         let pawn = Figure::new(FigureType::Pawn, Position::new(4, 4), true, 1, true);
-        let raw_options = MoveOptions{positions: vec![Position::new(4, 5), Position::new(4, 6)]};
+        let raw_options = MoveOptions {
+            positions: vec![Position::new(4, 5), Position::new(4, 6)],
+        };
         assert_eq!(pawn.raw_options(), raw_options);
         let pawn = Figure::new(FigureType::Pawn, Position::new(4, 4), true, 1, false);
-        let raw_options = MoveOptions{positions: vec![Position::new(4, 5)]};
+        let raw_options = MoveOptions {
+            positions: vec![Position::new(4, 5)],
+        };
         assert_eq!(pawn.raw_options(), raw_options);
     }
 
