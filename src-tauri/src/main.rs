@@ -25,7 +25,7 @@ fn get_board(game: State<Game>) -> Board {
 #[tauri::command]
 fn get_options(game: State<Game>, figure_id: i32) -> MoveOptions {
     let board = game.board.lock().unwrap().clone();
-    board.get_figure_from_id(figure_id).raw_Options()
+    board.get_figure_from_id(figure_id).raw_options()
 }
 
 fn main() {
@@ -47,7 +47,7 @@ enum FigureType {
 }
 
 impl Figure {
-    fn raw_Options(&self) -> MoveOptions {
+    fn raw_options(&self) -> MoveOptions {
         match &self.kind {
             FigureType::Pawn => {
                 let mut options: Vec<Position> = vec![];
@@ -62,7 +62,7 @@ impl Figure {
                         options.push(Position::new(self.position.x, self.position.y - 2));
                     }
                 }
-                return MoveOptions {positions: options};
+                MoveOptions {positions: options}
             }
             FigureType::King => MoveOptions {positions: vec![
                 Position::new(self.position.x - 1, self.position.y),
@@ -92,7 +92,7 @@ impl Figure {
                     pos.push(Position::new(self.position.x, self.position.y + distance));
                     pos.push(Position::new(self.position.x, self.position.y - distance));
                 }
-                return MoveOptions {positions: pos}
+                MoveOptions {positions: pos}
             }
             FigureType::Bishop => {
                 let mut pos: Vec<Position> = vec![];
@@ -114,7 +114,7 @@ impl Figure {
                         self.position.y - distance,
                     ));
                 }
-                return MoveOptions {positions: pos}
+                MoveOptions {positions: pos}
             }
             FigureType::Queen => {
                 let mut pos: Vec<Position> = vec![];
@@ -140,7 +140,7 @@ impl Figure {
                     pos.push(Position::new(self.position.x, self.position.y + distance));
                     pos.push(Position::new(self.position.x, self.position.y - distance));
                 }
-                return MoveOptions {positions: pos}
+                MoveOptions {positions: pos}
             }
         }
     }
@@ -257,7 +257,7 @@ impl Board {
     fn get_figure_from_id(&self, id: i32) -> &Figure {
         for figure in &self.figures {
             if figure.id == id {
-                return &figure;
+                return figure;
             }
         }
         &self.figures[0] // This case should never happen
@@ -272,9 +272,9 @@ mod tests {
     fn pawn_test() {
         let pawn = Figure::new(FigureType::Pawn, Position::new(4, 4), true, 1, true);
         let raw_options = MoveOptions{positions: vec![Position::new(4, 5), Position::new(4, 6)]};
-        assert_eq!(pawn.raw_Options(), raw_options);
+        assert_eq!(pawn.raw_options(), raw_options);
         let pawn = Figure::new(FigureType::Pawn, Position::new(4, 4), true, 1, false);
         let raw_options = MoveOptions{positions: vec![Position::new(4, 5)]};
-        assert_eq!(pawn.raw_Options(), raw_options);
+        assert_eq!(pawn.raw_options(), raw_options);
     }
 }
