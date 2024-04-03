@@ -13,13 +13,13 @@ fn greet(name: &str) -> String {
 
 #[tauri::command]
 fn get_board(game: State<Game>) -> Board {
-    let a = game.0.lock().unwrap().clone();
+    let a = game.board.lock().unwrap().clone();
     a
 }
 
 #[tauri::command]
 fn get_options(game: State<Game>, figure_id: i32) -> Vec<Position> {
-    let board = game.0.lock().unwrap().clone();
+    let board = game.board.lock().unwrap().clone();
     board.get_figure_from_id(figure_id).movable()
 }
 
@@ -176,12 +176,23 @@ impl Position {
     }
 }
 
+#[derive(Serialize, Default)]
+struct Player {
+    white: bool,
+}
+
 #[derive(Serialize)]
-struct Game(Mutex<Board>);
+struct Game {
+    board: Mutex<Board>,
+    player: Mutex<Player>,
+}
 
 impl Game {
     fn init() -> Self {
-        Game(Mutex::new(Board::init()))
+        Game {
+            board: Mutex::new(Board::init()),
+            player: Mutex::new(Player::default()),
+        }
     }
 }
 
