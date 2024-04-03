@@ -5,13 +5,13 @@ async function greet() {
 }
 
 async function setPlayerColor() {
-    let color = document.forms["playerColor"]["color"].value === "true";
-    invoke("set_player_color", {white: color});
+  let color = document.forms["playerColor"]["color"].value === "true";
+  invoke("set_player_color", {white: color});
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    document.querySelector("#playerColor").addEventListener("submit", (e) => {
-        e.preventDefault();
-      setPlayerColor();
-    });
+  document.querySelector("#playerColor").addEventListener("submit", (e) => {
+    e.preventDefault();
+    setPlayerColor();
+  });
 });
