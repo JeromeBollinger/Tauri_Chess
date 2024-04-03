@@ -23,9 +23,9 @@ fn get_board(game: State<Game>) -> Board {
 }
 
 #[tauri::command]
-fn get_options(game: State<Game>, figure_id: i32) -> Vec<Position> {
+fn get_options(game: State<Game>, figure_id: i32) -> MoveOptions {
     let board = game.board.lock().unwrap().clone();
-    board.get_figure_from_id(figure_id).movable()
+    board.get_figure_from_id(figure_id).raw_Options()
 }
 
 fn main() {
@@ -47,7 +47,7 @@ enum FigureType {
 }
 
 impl Figure {
-    fn movable(&self) -> Vec<Position> {
+    fn raw_Options(&self) -> MoveOptions {
         match &self.kind {
             FigureType::Pawn => {
                 let mut options: Vec<Position> = vec![];
@@ -62,9 +62,9 @@ impl Figure {
                         options.push(Position::new(self.position.x, self.position.y - 2));
                     }
                 }
-                return options;
+                return MoveOptions {positions: options};
             }
-            FigureType::King => vec![
+            FigureType::King => MoveOptions {positions: vec![
                 Position::new(self.position.x - 1, self.position.y),
                 Position::new(self.position.x - 1, self.position.y + 1),
                 Position::new(self.position.x, self.position.y + 1),
@@ -73,8 +73,8 @@ impl Figure {
                 Position::new(self.position.x + 1, self.position.y - 1),
                 Position::new(self.position.x, self.position.y - 1),
                 Position::new(self.position.x - 1, self.position.y - 1),
-            ],
-            FigureType::Knight => vec![
+            ]},
+            FigureType::Knight => MoveOptions {positions: vec![
                 Position::new(self.position.x - 2, self.position.y + 1),
                 Position::new(self.position.x - 1, self.position.y + 2),
                 Position::new(self.position.x + 1, self.position.y + 2),
@@ -83,7 +83,7 @@ impl Figure {
                 Position::new(self.position.x + 2, self.position.y - 1),
                 Position::new(self.position.x - 2, self.position.y - 1),
                 Position::new(self.position.x - 1, self.position.y - 2),
-            ],
+            ]},
             FigureType::Rook => {
                 let mut pos: Vec<Position> = vec![];
                 for distance in 1..8 {
@@ -92,7 +92,7 @@ impl Figure {
                     pos.push(Position::new(self.position.x, self.position.y + distance));
                     pos.push(Position::new(self.position.x, self.position.y - distance));
                 }
-                pos
+                return MoveOptions {positions: pos}
             }
             FigureType::Bishop => {
                 let mut pos: Vec<Position> = vec![];
@@ -114,7 +114,7 @@ impl Figure {
                         self.position.y - distance,
                     ));
                 }
-                pos
+                return MoveOptions {positions: pos}
             }
             FigureType::Queen => {
                 let mut pos: Vec<Position> = vec![];
@@ -140,7 +140,7 @@ impl Figure {
                     pos.push(Position::new(self.position.x, self.position.y + distance));
                     pos.push(Position::new(self.position.x, self.position.y - distance));
                 }
-                pos
+                return MoveOptions {positions: pos}
             }
         }
     }
@@ -167,6 +167,11 @@ impl Figure {
             first_move,
         }
     }
+}
+
+#[derive(Serialize, Clone)]
+struct MoveOptions {
+    positions: Vec<Position>
 }
 
 #[derive(Serialize, Clone)]
