@@ -169,12 +169,12 @@ impl Figure {
     }
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, Debug, PartialEq)]
 struct MoveOptions {
     positions: Vec<Position>
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, Debug, PartialEq)]
 struct Position {
     x: i32,
     y: i32,
@@ -261,5 +261,20 @@ impl Board {
             }
         }
         &self.figures[0] // This case should never happen
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pawn_test() {
+        let pawn = Figure::new(FigureType::Pawn, Position::new(4, 4), true, 1, true);
+        let raw_options = MoveOptions{positions: vec![Position::new(4, 5), Position::new(4, 6)]};
+        assert_eq!(pawn.raw_Options(), raw_options);
+        let pawn = Figure::new(FigureType::Pawn, Position::new(4, 4), true, 1, false);
+        let raw_options = MoveOptions{positions: vec![Position::new(4, 5)]};
+        assert_eq!(pawn.raw_Options(), raw_options);
     }
 }
