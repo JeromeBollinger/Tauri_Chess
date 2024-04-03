@@ -25,7 +25,7 @@ fn get_board(game: State<Game>) -> Board {
 #[tauri::command]
 fn get_options(game: State<Game>, figure_id: i32) -> MoveOptions {
     let board = game.board.lock().unwrap().clone();
-    board.get_figure_from_id(figure_id).raw_options()
+    board.get_figure_from_id(figure_id).raw_options().remove_out_of_bounds_options()
 }
 
 fn main() {
