@@ -172,6 +172,14 @@ impl Figure {
 #[derive(Serialize, Clone, Debug, PartialEq)]
 struct MoveOptions {
     positions: Vec<Position>
+impl MoveOptions {
+    fn remove_out_of_bounds_options(mut self) -> Self{
+        let allowed_range = 0..8;
+        self.positions.retain(|position| {
+            allowed_range.contains(&position.x) && allowed_range.contains(&position.y)
+        });
+        self
+    }
 }
 
 #[derive(Serialize, Clone, Debug, PartialEq)]
@@ -276,5 +284,37 @@ mod tests {
         let pawn = Figure::new(FigureType::Pawn, Position::new(4, 4), true, 1, false);
         let raw_options = MoveOptions{positions: vec![Position::new(4, 5)]};
         assert_eq!(pawn.raw_options(), raw_options);
+    }
+
+    #[test]
+    fn remove_out_of_bounds_position() {
+        let raw_options = MoveOptions {
+            positions: vec![
+                Position::new(-4, 5),
+                Position::new(-4, -5),
+                Position::new(4, -5),
+                Position::new(8, 5),
+                Position::new(5, 8),
+                Position::new(-4, 8),
+                Position::new(4, 5),
+                Position::new(0, 5),
+                Position::new(7, 5),
+                Position::new(5, 7),
+                Position::new(7, 7),
+
+            ],
+        };
+        let inbound_options = MoveOptions {
+            positions: vec![
+                Position::new(4, 5),
+                Position::new(0, 5),
+                Position::new(7, 5),
+                Position::new(5, 7),
+                Position::new(7, 7),
+
+            ],
+        };
+        assert_eq!(raw_options.remove_out_of_bounds_options()
+                   , inbound_options);
     }
 }
