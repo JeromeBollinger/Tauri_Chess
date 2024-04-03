@@ -17,13 +17,14 @@
     <div class="container">
       <h1>Welcome to Tauri Chess!</h1>
 
-      <p>Please pick your Game</p>
-      <input type="radio" value="white" name="color" checked>
-      <label for="white">White</label>
-      <input type="radio" value="black" name="color">
-      <label for="black">Black</label>
-      <a href="chess_board.html"><button type="submit">Play!</button></a>
-
+      <form id="playerColor" method="POST">
+        <p>Please pick your Game</p>
+        <input type="radio" value="true" name="color" checked>
+        <label for="color">White</label>
+        <input type="radio" value="false" name="color">
+        <label for="color">Black</label>
+        <a href="chess_board.html"><button type="submit">Play!</button></a>
+      </form>
     </div>
   </body>
 </html>

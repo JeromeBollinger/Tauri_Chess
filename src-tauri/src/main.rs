@@ -5,7 +5,12 @@ use serde::Serialize;
 use std::sync::Mutex;
 use tauri::State;
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+#[tauri::command]
+fn set_player_color(game: State<Game>, white: bool) {
+    let mut p = game.player.lock().unwrap();
+    p.white = white;
+}
+
 #[tauri::command]
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
@@ -26,7 +31,7 @@ fn get_options(game: State<Game>, figure_id: i32) -> Vec<Position> {
 fn main() {
     tauri::Builder::default()
         .manage(Game::init())
-        .invoke_handler(tauri::generate_handler![greet, get_board, get_options])
+        .invoke_handler(tauri::generate_handler![greet, get_board, get_options, set_player_color])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
