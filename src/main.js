@@ -13,5 +13,6 @@ window.addEventListener("DOMContentLoaded", () => {
   document.querySelector("#playerColor").addEventListener("submit", (e) => {
     e.preventDefault();
     setPlayerColor();
+    window.location.replace("chess_board.html");
   });
 });
