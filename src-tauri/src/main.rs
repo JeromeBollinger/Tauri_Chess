@@ -232,6 +232,14 @@ struct Board {
 }
 
 impl Board {
+    fn occupied_at(&self, position: Position) -> Option<&Figure> {
+        for figure in self.figures {
+            if figure.position == position {
+                return Some(&figure)
+            }
+        }
+        None
+    }
     fn init() -> Board {
         let mut fig: Vec<Figure> = vec![
             Figure::new(FigureType::Rook, Position::new(0, 0), true, 1, true),
