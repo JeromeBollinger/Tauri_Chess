@@ -51,7 +51,7 @@ canva.addEventListener('click', e => {
   })
   getOptions(figureId).then(
     options => {
-      optionShapes = drawOptions(options.positions)
+      optionShapes = drawOptions(options.movable)
     }
   ).catch(error =>
     console.log(error, "could not fetch options")

@@ -24,8 +24,12 @@ fn get_board(game: State<Game>) -> Board {
 
 #[tauri::command]
 fn get_options(game: State<Game>, figure_id: i32) -> MoveOptions {
+    let b = game.board.lock().unwrap().clone();
     let board = game.board.lock().unwrap().clone();
-    board.get_figure_from_id(figure_id).raw_options().remove_out_of_bounds_options()
+    board
+        .get_figure_from_id(figure_id)
+        .get_move_options(b)
+        .remove_out_of_bounds_options()
 }
 
 fn main() {
@@ -52,25 +56,45 @@ enum FigureType {
 }
 
 impl Figure {
-    fn raw_options(&self) -> MoveOptions {
+    fn get_move_options(&self, board: Board) -> MoveOptions {
         match &self.kind {
             FigureType::Pawn => {
-                let mut options: Vec<Position> = vec![];
-                if self.white {
-                    options.push(Position::new(self.position.x, self.position.y + 1));
-                    if self.first_move {
-                        options.push(Position::new(self.position.x, self.position.y + 2));
-                    }
-                } else {
-                    options.push(Position::new(self.position.x, self.position.y - 1));
-                    if self.first_move {
-                        options.push(Position::new(self.position.x, self.position.y - 2));
+                let mut movable: Vec<Position> = vec![];
+                let mut killable: Vec<Position> = vec![];
+                let direction = if self.white { 1 } else { -1 };
+                // Movable position if free in front
+                let p = Position::new(self.position.x, self.position.y + 1 * direction);
+                if board.occupied_by(p).is_none() {
+                    movable.push(p)
+                }
+                // Movable position if free in front and first move
+                if self.first_move {
+                    let p = Position::new(self.position.x, self.position.y + 2 * direction);
+                    if board.occupied_by(p).is_none() {
+                        movable.push(p)
                     }
                 }
-                MoveOptions { positions: options }
+                // Killable positions diagonal left
+                let p = Position::new(self.position.x + 1, self.position.y + 1 * direction);
+                if let Some(f) = board.occupied_by(p) {
+                    if f.white != self.white {
+                        killable.push(p)
+                    }
+                }
+                // Killable positions diagonal right
+                let p = Position::new(self.position.x - 1, self.position.y + 1 * direction);
+                if let Some(f) = board.occupied_by(p) {
+                    if f.white != self.white {
+                        killable.push(p)
+                    }
+                }
+                // TODO: En passant
+                MoveOptions { movable, killable }
             }
-            FigureType::King => MoveOptions {
-                positions: vec![
+            FigureType::King => {
+                let mut movable = vec![];
+                let mut killable = vec![];
+                let moves = vec![
                     Position::new(self.position.x - 1, self.position.y),
                     Position::new(self.position.x - 1, self.position.y + 1),
                     Position::new(self.position.x, self.position.y + 1),
@@ -79,10 +103,23 @@ impl Figure {
                     Position::new(self.position.x + 1, self.position.y - 1),
                     Position::new(self.position.x, self.position.y - 1),
                     Position::new(self.position.x - 1, self.position.y - 1),
-                ],
-            },
-            FigureType::Knight => MoveOptions {
-                positions: vec![
+                ];
+                for p in moves {
+                    match board.occupied_by(p) {
+                        Some(f) => {
+                            if f.white != self.white {
+                                killable.push(p)
+                            }
+                        }
+                        None => movable.push(p),
+                    }
+                }
+                MoveOptions { movable, killable }
+            }
+            FigureType::Knight => {
+                let mut movable = vec![];
+                let mut killable = vec![];
+                let moves = vec![
                     Position::new(self.position.x - 2, self.position.y + 1),
                     Position::new(self.position.x - 1, self.position.y + 2),
                     Position::new(self.position.x + 1, self.position.y + 2),
@@ -91,65 +128,133 @@ impl Figure {
                     Position::new(self.position.x + 2, self.position.y - 1),
                     Position::new(self.position.x - 2, self.position.y - 1),
                     Position::new(self.position.x - 1, self.position.y - 2),
-                ],
-            },
-            FigureType::Rook => {
-                let mut pos: Vec<Position> = vec![];
-                for distance in 1..8 {
-                    pos.push(Position::new(self.position.x + distance, self.position.y));
-                    pos.push(Position::new(self.position.x - distance, self.position.y));
-                    pos.push(Position::new(self.position.x, self.position.y + distance));
-                    pos.push(Position::new(self.position.x, self.position.y - distance));
+                ];
+                for p in moves {
+                    match board.occupied_by(p) {
+                        Some(f) => {
+                            if f.white != self.white {
+                                killable.push(p)
+                            }
+                        }
+                        None => movable.push(p),
+                    }
                 }
-                MoveOptions { positions: pos }
+                MoveOptions { movable, killable }
+            }
+            FigureType::Rook => {
+                let mut movable = vec![];
+                let mut killable = vec![];
+                let directions = vec![-1, 1];
+
+                // horizontal left and right
+                for direction in &directions {
+                    for distance in 1..8 {
+                        let p =
+                            Position::new(self.position.x + distance * direction, self.position.y);
+                        if let Some(f) = board.occupied_by(p) {
+                            if f.white != self.white {
+                                killable.push(p)
+                            }
+                            break; // Figure is blocked and cannot move further
+                        } else {
+                            movable.push(p)
+                        }
+                    }
+                }
+                // vertical up and down
+                for direction in &directions {
+                    for distance in 1..8 {
+                        let p =
+                            Position::new(self.position.x, self.position.y + distance * direction);
+                        if let Some(f) = board.occupied_by(p) {
+                            if f.white != self.white {
+                                killable.push(p)
+                            }
+                            break; // Figure is blocked and cannot move further
+                        } else {
+                            movable.push(p)
+                        }
+                    }
+                }
+                MoveOptions { movable, killable }
             }
             FigureType::Bishop => {
-                let mut pos: Vec<Position> = vec![];
-                for distance in 1..8 {
-                    pos.push(Position::new(
-                        self.position.x + distance,
-                        self.position.y + distance,
-                    ));
-                    pos.push(Position::new(
-                        self.position.x - distance,
-                        self.position.y - distance,
-                    ));
-                    pos.push(Position::new(
-                        self.position.x - distance,
-                        self.position.y + distance,
-                    ));
-                    pos.push(Position::new(
-                        self.position.x + distance,
-                        self.position.y - distance,
-                    ));
+                let mut movable = vec![];
+                let mut killable = vec![];
+                let directions = vec![-1, 1];
+
+                // diagonal /
+                for direction in directions {
+                    for distance in 1..8 {
+                        let p = Position::new(
+                            self.position.x + distance * direction,
+                            self.position.y + distance * direction,
+                        );
+                        if let Some(f) = board.occupied_by(p) {
+                            if f.white != self.white {
+                                killable.push(p)
+                            }
+                            break; // Figure is blocked and cannot move further
+                        } else {
+                            movable.push(p)
+                        }
+                    }
+                    // diagonal \
+                    for distance in 1..8 {
+                        let p = Position::new(
+                            self.position.x + distance * -1 * direction,
+                            self.position.y + distance * direction,
+                        );
+                        if let Some(f) = board.occupied_by(p) {
+                            if f.white != self.white {
+                                killable.push(p)
+                            }
+                            break; // Figure is blocked and cannot move further
+                        } else {
+                            movable.push(p)
+                        }
+                    }
                 }
-                MoveOptions { positions: pos }
+                MoveOptions { movable, killable }
             }
             FigureType::Queen => {
-                let mut pos: Vec<Position> = vec![];
-                for distance in 1..8 {
-                    pos.push(Position::new(
-                        self.position.x + distance,
-                        self.position.y + distance,
-                    ));
-                    pos.push(Position::new(
-                        self.position.x - distance,
-                        self.position.y - distance,
-                    ));
-                    pos.push(Position::new(
-                        self.position.x - distance,
-                        self.position.y + distance,
-                    ));
-                    pos.push(Position::new(
-                        self.position.x + distance,
-                        self.position.y - distance,
-                    ));
-                    pos.push(Position::new(self.position.x + distance, self.position.y));
-                    pos.push(Position::new(self.position.x - distance, self.position.y));
-                    pos.push(Position::new(self.position.x, self.position.y + distance));
-                    pos.push(Position::new(self.position.x, self.position.y - distance));
+                let mut movable = vec![];
+                let mut killable = vec![];
+                let directions = vec![-1, 1];
+
+                // diagonal /
+                for direction in directions {
+                    for distance in 1..8 {
+                        let p = Position::new(
+                            self.position.x + distance * direction,
+                            self.position.y + distance * direction,
+                        );
+                        if let Some(f) = board.occupied_by(p) {
+                            if f.white != self.white {
+                                killable.push(p)
+                            }
+                            break; // Figure is blocked and cannot move further
+                        } else {
+                            movable.push(p)
+                        }
+                    }
+                    // diagonal \
+                    for distance in 1..8 {
+                        let p = Position::new(
+                            self.position.x + distance * -1 * direction,
+                            self.position.y + distance * direction,
+                        );
+                        if let Some(f) = board.occupied_by(p) {
+                            if f.white != self.white {
+                                killable.push(p)
+                            }
+                            break; // Figure is blocked and cannot move further
+                        } else {
+                            movable.push(p)
+                        }
+                    }
                 }
-                MoveOptions { positions: pos }
+                MoveOptions { movable, killable }
             }
         }
     }
@@ -180,20 +285,21 @@ impl Figure {
 
 #[derive(Serialize, Clone, Debug, PartialEq)]
 struct MoveOptions {
-    positions: Vec<Position>,
+    movable: Vec<Position>,
+    killable: Vec<Position>,
 }
 
 impl MoveOptions {
     fn remove_out_of_bounds_options(mut self) -> Self {
         let allowed_range = 0..8;
-        self.positions.retain(|position| {
+        self.movable.retain(|position| {
             allowed_range.contains(&position.x) && allowed_range.contains(&position.y)
         });
         self
     }
 }
 
-#[derive(Serialize, Clone, Debug, PartialEq)]
+#[derive(Serialize, Clone, Debug, PartialEq, Copy)]
 struct Position {
     x: i32,
     y: i32,
@@ -232,10 +338,10 @@ struct Board {
 }
 
 impl Board {
-    fn occupied_at(&self, position: Position) -> Option<&Figure> {
-        for figure in self.figures {
+    fn occupied_by(&self, position: Position) -> Option<&Figure> {
+        for figure in &self.figures {
             if figure.position == position {
-                return Some(&figure)
+                return Some(&figure);
             }
         }
         None
@@ -299,20 +405,34 @@ mod tests {
     fn pawn_test() {
         let pawn = Figure::new(FigureType::Pawn, Position::new(4, 4), true, 1, true);
         let raw_options = MoveOptions {
-            positions: vec![Position::new(4, 5), Position::new(4, 6)],
+            movable: vec![Position::new(4, 5), Position::new(4, 6)],
+            killable: vec![],
         };
-        assert_eq!(pawn.raw_options(), raw_options);
+        assert_eq!(
+            pawn.get_move_options(Board {
+                round: 0,
+                figures: vec![]
+            }),
+            raw_options
+        );
         let pawn = Figure::new(FigureType::Pawn, Position::new(4, 4), true, 1, false);
         let raw_options = MoveOptions {
-            positions: vec![Position::new(4, 5)],
+            movable: vec![Position::new(4, 5)],
+            killable: vec![],
         };
-        assert_eq!(pawn.raw_options(), raw_options);
+        assert_eq!(
+            pawn.get_move_options(Board {
+                figures: vec![],
+                round: 1
+            }),
+            raw_options
+        );
     }
 
     #[test]
     fn remove_out_of_bounds_position() {
         let raw_options = MoveOptions {
-            positions: vec![
+            movable: vec![
                 Position::new(-4, 5),
                 Position::new(-4, -5),
                 Position::new(4, -5),
@@ -325,15 +445,17 @@ mod tests {
                 Position::new(5, 7),
                 Position::new(7, 7),
             ],
+            killable: vec![],
         };
         let inbound_options = MoveOptions {
-            positions: vec![
+            movable: vec![
                 Position::new(4, 5),
                 Position::new(0, 5),
                 Position::new(7, 5),
                 Position::new(5, 7),
                 Position::new(7, 7),
             ],
+            killable: vec![],
         };
         assert_eq!(raw_options.remove_out_of_bounds_options(), inbound_options);
     }
