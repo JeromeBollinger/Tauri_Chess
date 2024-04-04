@@ -47,15 +47,17 @@ canva.addEventListener('click', e => {
     if (canvas.isPointInPath(figureShape.shape, e.offsetX, e.offsetY)) {
       console.log(figureShape.object)
       figureId = figureShape.object.id;
+
+      getOptions(figureId).then(
+        options => {
+          optionShapes = drawOptions(options.movable)
+        }
+      ).catch(error =>
+        console.log(error, "could not fetch options")
+      );
     }
   })
-  getOptions(figureId).then(
-    options => {
-      optionShapes = drawOptions(options.movable)
-    }
-  ).catch(error =>
-    console.log(error, "could not fetch options")
-  );
+
 })
 
 function drawFigures(board) {
