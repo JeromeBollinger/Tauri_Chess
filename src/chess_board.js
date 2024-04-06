@@ -30,6 +30,7 @@ async function getBoard() {
 
 let figureShapes = [];
 let optionShapes = [];
+let figureId;
 
 window.addEventListener("load", () => {
   redrawBoard()
@@ -42,23 +43,45 @@ async function getOptions(figureId) {
 
 canva.addEventListener('click', e => {
   let canvas = canva.getContext("2d");
-  let figureId;
-  figureShapes.forEach((figureShape) => {
+
+  let clicked_on_figure = false;
+  figureShapes.some((figureShape) => {
     if (canvas.isPointInPath(figureShape.shape, e.offsetX, e.offsetY)) {
       console.log(figureShape.object)
       figureId = figureShape.object.id;
-
       getOptions(figureId).then(
         options => {
           optionShapes = drawOptions(options.movable)
+          clicked_on_figure = true;
         }
       ).catch(error =>
         console.log(error, "could not fetch options")
       );
     }
+    return;
   })
-
+  optionShapes.some((optionShape) => {
+    if (canvas.isPointInPath(optionShape.shape, e.offsetX, e.offsetY)) {
+      console.log(optionShape.object);
+      console.log(figureId);
+      setPosition(optionShape.object, figureId).then(
+        a => {
+          console.log(a);
+    }).catch(error =>
+      console.log(error, "could not set figure ")
+    );
+    }
+    return;
+  })
+  if (!clicked_on_figure) {
+    redrawBoard();
+  }
 })
+
+async function setPosition(object, figureId) {
+  invoke("set_position_of_at", {"figureId": figureId, "x": object.x, "y": object.y});
+  return true
+}
 
 function drawFigures(board) {
   board.figures.forEach((figure) => {
