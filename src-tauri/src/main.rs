@@ -36,10 +36,11 @@ fn get_options(game: State<Game>, figure_id: i32) -> MoveOptions {
 #[tauri::command]
 fn set_position_of_at(game: State<Game>, figure_id: i32, x: i32, y: i32) {
     let mut board = game.board.lock().unwrap();
-    board
+    let figure = board
         .get_figure_from_id_mut(figure_id)
-        .unwrap()
-        .set_position(x, y);
+        .unwrap();
+    figure.set_position(x, y);
+    figure.first_move = false;
 }
 
 fn main() {
