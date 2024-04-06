@@ -27,7 +27,8 @@ fn get_options(game: State<Game>, figure_id: i32) -> MoveOptions {
     let b = game.board.lock().unwrap().clone();
     let board = game.board.lock().unwrap().clone();
     board
-        .get_figure_from_id(figure_id).unwrap()
+        .get_figure_from_id(figure_id)
+        .unwrap()
         .get_move_options(b)
         .remove_out_of_bounds_options()
 }
@@ -35,7 +36,10 @@ fn get_options(game: State<Game>, figure_id: i32) -> MoveOptions {
 #[tauri::command]
 fn set_position_of_at(game: State<Game>, figure_id: i32, x: i32, y: i32) {
     let mut board = game.board.lock().unwrap();
-    board.get_figure_from_id_mut(figure_id).unwrap().set_position(x, y);
+    board
+        .get_figure_from_id_mut(figure_id)
+        .unwrap()
+        .set_position(x, y);
 }
 
 fn main() {
@@ -433,7 +437,7 @@ impl Board {
         self.figures.iter().find(|figure| figure.id == id)
     }
     fn get_figure_from_id_mut(&mut self, id: i32) -> Option<&mut Figure> {
-         self.figures.iter_mut().find(|figure| figure.id == id)
+        self.figures.iter_mut().find(|figure| figure.id == id)
     }
 }
 
