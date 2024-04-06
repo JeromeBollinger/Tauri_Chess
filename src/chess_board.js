@@ -91,7 +91,11 @@ function drawFigures(board) {
 
 function drawFigure(figure) {
   let canvas = canva.getContext("2d");
-  canvas.fillStyle = "yellow"
+  if (figure.white) {
+    canvas.fillStyle = "#FFDAB9";
+  } else {
+    canvas.fillStyle = "#8B5742";
+  }
   let circle = new Path2D();
   circle.arc(figure.position.x * rect_length + rect_length / 2, figure.position.y * rect_length + rect_length / 2, rect_length / 2.5, 0, 2 * Math.PI);
   canvas.fill(circle);
