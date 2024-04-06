@@ -78,7 +78,7 @@ impl Figure {
                 let mut killable: Vec<Position> = vec![];
                 let direction = if self.white { 1 } else { -1 };
                 // Movable position if free in front
-                let p = Position::new(self.position.x, self.position.y + 1 * direction);
+                let p = Position::new(self.position.x, self.position.y + direction);
                 if board.occupied_by(p).is_none() {
                     movable.push(p)
                 }
@@ -90,14 +90,14 @@ impl Figure {
                     }
                 }
                 // Killable positions diagonal left
-                let p = Position::new(self.position.x + 1, self.position.y + 1 * direction);
+                let p = Position::new(self.position.x + 1, self.position.y + direction);
                 if let Some(f) = board.occupied_by(p) {
                     if f.white != self.white {
                         killable.push(p)
                     }
                 }
                 // Killable positions diagonal right
-                let p = Position::new(self.position.x - 1, self.position.y + 1 * direction);
+                let p = Position::new(self.position.x - 1, self.position.y + direction);
                 if let Some(f) = board.occupied_by(p) {
                     if f.white != self.white {
                         killable.push(p)
@@ -217,7 +217,7 @@ impl Figure {
                     // diagonal \
                     for distance in 1..8 {
                         let p = Position::new(
-                            self.position.x + distance * -1 * direction,
+                            self.position.x + -distance * direction,
                             self.position.y + distance * direction,
                         );
                         if let Some(f) = board.occupied_by(p) {
@@ -287,7 +287,7 @@ impl Figure {
                     // diagonal \
                     for distance in 1..8 {
                         let p = Position::new(
-                            self.position.x + distance * -1 * direction,
+                            self.position.x + -distance * direction,
                             self.position.y + distance * direction,
                         );
                         if let Some(f) = board.occupied_by(p) {
@@ -385,12 +385,7 @@ struct Board {
 
 impl Board {
     fn occupied_by(&self, position: Position) -> Option<&Figure> {
-        for figure in &self.figures {
-            if figure.position == position {
-                return Some(&figure);
-            }
-        }
-        None
+        self.figures.iter().find(|&figure| figure.position == position)
     }
     fn init() -> Board {
         let mut fig: Vec<Figure> = vec![
