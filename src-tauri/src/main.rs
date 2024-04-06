@@ -233,6 +233,37 @@ impl Figure {
                 let mut killable = vec![];
                 let directions = vec![-1, 1];
 
+                // horizontal left and right
+                for direction in &directions {
+                    for distance in 1..8 {
+                        let p =
+                            Position::new(self.position.x + distance * direction, self.position.y);
+                        if let Some(f) = board.occupied_by(p) {
+                            if f.white != self.white {
+                                killable.push(p)
+                            }
+                            break; // Figure is blocked and cannot move further
+                        } else {
+                            movable.push(p)
+                        }
+                    }
+                }
+                // vertical up and down
+                for direction in &directions {
+                    for distance in 1..8 {
+                        let p =
+                            Position::new(self.position.x, self.position.y + distance * direction);
+                        if let Some(f) = board.occupied_by(p) {
+                            if f.white != self.white {
+                                killable.push(p)
+                            }
+                            break; // Figure is blocked and cannot move further
+                        } else {
+                            movable.push(p)
+                        }
+                    }
+                }
+
                 // diagonal /
                 for direction in directions {
                     for distance in 1..8 {
