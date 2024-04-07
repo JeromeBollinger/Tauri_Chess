@@ -4,30 +4,6 @@ const canva = document.getElementById("board");
 var canvas_length = window.screen.height / 2;
 var rect_length = canvas_length / 8;
 
-
-function fillBoard() {
-  canva.width = canvas_length;
-  canva.height = canvas_length;
-  let canvas = canva.getContext("2d");
-  let n = 0;
-  for (let x = 0; x <= 8; x++) {
-    for (let y = 0; y <= 8; y++) {
-      if (n % 2 == 0) {
-        canvas.fillStyle = "black"
-      } else {
-        canvas.fillStyle = "white"
-      }
-      canvas.fillRect(x * rect_length, y * rect_length, canvas_length, canvas_length)
-      n++;
-    }
-  }
-}
-
-async function getBoard() {
-  let figures = await invoke("get_board");
-  return figures;
-}
-
 let global_figureShapes = [];
 let global_optionShapes = [];
 let figureId;
@@ -35,11 +11,6 @@ let figureId;
 window.addEventListener("load", () => {
   redrawBoard()
 });
-
-async function getOptions(figureId) {
-  let options = await invoke("get_options", { "figureId": figureId });
-  return options;
-}
 
 canva.addEventListener('click', e => {
   let canvas = canva.getContext("2d");
@@ -81,11 +52,25 @@ canva.addEventListener('click', e => {
   }
 })
 
+
+// Rust invokes
+async function getBoard() {
+  let figures = await invoke("get_board");
+  return figures;
+}
+
+async function getOptions(figureId) {
+  let options = await invoke("get_options", { "figureId": figureId });
+  return options;
+}
+
 async function setPosition(object, figureId) {
   invoke("set_position_of_at", {"figureId": figureId, "x": object.x, "y": object.y});
   return true
 }
 
+
+// Drawing to canvas
 function drawFigures(board) {
   board.figures.forEach((figure) => {
     global_figureShapes.push(drawFigure(figure));
@@ -143,4 +128,22 @@ function redrawBoard() {
     }).catch(error =>
       console.log(error, "could not fetch board!!! ")
     )
+}
+
+function fillBoard() {
+  canva.width = canvas_length;
+  canva.height = canvas_length;
+  let canvas = canva.getContext("2d");
+  let n = 0;
+  for (let x = 0; x <= 8; x++) {
+    for (let y = 0; y <= 8; y++) {
+      if (n % 2 == 0) {
+        canvas.fillStyle = "black"
+      } else {
+        canvas.fillStyle = "white"
+      }
+      canvas.fillRect(x * rect_length, y * rect_length, canvas_length, canvas_length)
+      n++;
+    }
+  }
 }
