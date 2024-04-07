@@ -51,8 +51,10 @@ canva.addEventListener('click', e => {
       figureId = figureShape.object.id;
       getOptions(figureId).then(
         options => {
-          global_optionShapes = drawOptions(options.movable)
-          clicked_on_figure = true;
+          if(options !== null){
+            global_optionShapes = drawOptions(options.movable)
+            clicked_on_figure = true;
+          }
         }
       ).catch(error =>
         console.log(error, "could not fetch options or not correct turn")
@@ -60,13 +62,14 @@ canva.addEventListener('click', e => {
     }
     return;
   })
+  if(global_optionShapes === null) return;
   global_optionShapes.some((optionShape) => {
     if (canvas.isPointInPath(optionShape.shape, e.offsetX, e.offsetY)) {
       console.log("figure with id "+ figureId + " moved to " + optionShape.object.x + "," + optionShape.object.y)
       setPosition(optionShape.object, figureId).then(
         a => {
           console.log(a);
-          global_optionShapes = {};
+          global_optionShapes = null;
     }).catch(error =>
       console.log(error, "could not set figure ")
     );
