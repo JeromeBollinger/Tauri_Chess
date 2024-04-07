@@ -40,8 +40,8 @@ canva.addEventListener('click', e => {
       getOptions(figureId).then(
         options => {
           if(options !== null){
-            global_optionShapes = drawOptions(options.movable)
-            global_killShapes = drawKillables(options.killable)
+            global_optionShapes = drawOptions(options.movable, "orange")
+            global_killShapes = drawOptions(options.killable, "red")
           }
         }
       ).catch(error =>
@@ -115,38 +115,12 @@ function drawFigure(figure) {
   return { "shape": circle, "object": figure };
 }
 
-function drawOptions(options) {
+function drawOptions(options, color) {
   let optionShapes = [];
   options.forEach((option) => {
-    optionShapes.push(drawOption(option));
+    optionShapes.push({"shape": drawCircle(color, option.x, option.y, rect_length /5), "object": option})
   });
   return optionShapes;
-}
-
-function drawOption(option) {
-  let canvas = canva.getContext("2d");
-  canvas.fillStyle = "orange"
-  let circle = new Path2D();
-  circle.arc(option.x * rect_length + rect_length / 2, option.y * rect_length + rect_length / 2, rect_length / 5, 0, 2 * Math.PI);
-  canvas.fill(circle);
-  return { "shape": circle, "object": option };
-}
-
-function drawKillables(options) {
-  let optionShapes = [];
-  options.forEach((option) => {
-    optionShapes.push(drawKillable(option));
-  });
-  return optionShapes;
-}
-
-function drawKillable(option) {
-  let canvas = canva.getContext("2d");
-  canvas.fillStyle = "red"
-  let circle = new Path2D();
-  circle.arc(option.x * rect_length + rect_length / 2, option.y * rect_length + rect_length / 2, rect_length / 5, 0, 2 * Math.PI);
-  canvas.fill(circle);
-  return { "shape": circle, "object": option };
 }
 
 function clearBoard() {
@@ -186,4 +160,13 @@ function fillBoard() {
       n++;
     }
   }
+}
+
+function drawCircle(fillstyle, x, y, size){
+  let canvas = canva.getContext("2d");
+  canvas.fillStyle = fillstyle
+  let circle = new Path2D();
+  circle.arc(x * rect_length + rect_length / 2, y * rect_length + rect_length / 2, size, 0, 2 * Math.PI);
+  canvas.fill(circle);
+  return circle;
 }
