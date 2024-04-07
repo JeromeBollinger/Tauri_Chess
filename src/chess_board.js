@@ -55,7 +55,7 @@ canva.addEventListener('click', e => {
           clicked_on_figure = true;
         }
       ).catch(error =>
-        console.log(error, "could not fetch options")
+        console.log(error, "could not fetch options or not correct turn")
       );
     }
     return;

@@ -23,24 +23,23 @@ fn get_board(game: State<Game>) -> Board {
 }
 
 #[tauri::command]
-fn get_options(game: State<Game>, figure_id: i32) -> MoveOptions {
+fn get_options(game: State<Game>, figure_id: i32) -> Option<MoveOptions> {
     let b = game.board.lock().unwrap().clone();
     let board = game.board.lock().unwrap().clone();
-    board
-        .get_figure_from_id(figure_id)
-        .unwrap()
-        .get_move_options(b)
-        .remove_out_of_bounds_options()
+    let figure = board.get_figure_from_id(figure_id).unwrap();
+    if figure.white == (board.round % 2 == 0) {
+        return Some(figure.get_move_options(b).remove_out_of_bounds_options());
+    }
+    return None;
 }
 
 #[tauri::command]
 fn set_position_of_at(game: State<Game>, figure_id: i32, x: i32, y: i32) {
     let mut board = game.board.lock().unwrap();
-    let figure = board
-        .get_figure_from_id_mut(figure_id)
-        .unwrap();
+    let figure = board.get_figure_from_id_mut(figure_id).unwrap();
     figure.set_position(x, y);
     figure.first_move = false;
+    board.round += 1;
 }
 
 fn main() {
