@@ -19,13 +19,15 @@ canva.addEventListener('click', e => {
   let clicked_on_figure = false;
   global_figureShapes.some((figureShape) => {
     if (canvas.isPointInPath(figureShape.shape, e.offsetX, e.offsetY)) {
+      redrawBoard();
+      clicked_on_figure = true;
       console.log(figureShape.object)
       figureId = figureShape.object.id;
       getOptions(figureId).then(
         options => {
           if(options !== null){
             global_optionShapes = drawOptions(options.movable)
-            clicked_on_figure = true;
+            global_killShapes = drawKillables(options.killable)
           }
         }
       ).catch(error =>
