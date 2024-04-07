@@ -24,13 +24,12 @@ fn get_board(game: State<Game>) -> Board {
 
 #[tauri::command]
 fn get_options(game: State<Game>, figure_id: i32) -> Option<MoveOptions> {
-    let b = game.board.lock().unwrap().clone();
-    let board = game.board.lock().unwrap().clone();
+    let board = game.board.lock().unwrap();
     let figure = board.get_figure_from_id(figure_id).unwrap();
     if figure.white == (board.round % 2 == 0) {
-        return Some(figure.get_move_options(b).remove_out_of_bounds_options());
+       return Some(figure.get_move_options(&board).remove_out_of_bounds_options());
     }
-    return None;
+    None
 }
 
 #[tauri::command]
@@ -71,7 +70,7 @@ impl Figure {
         self.position.x = x;
         self.position.y = y;
     }
-    fn get_move_options(&self, board: Board) -> MoveOptions {
+    fn get_move_options(&self, board: &Board) -> MoveOptions {
         match &self.kind {
             FigureType::Pawn => {
                 let mut movable: Vec<Position> = vec![];
@@ -450,7 +449,7 @@ mod tests {
             killable: vec![],
         };
         assert_eq!(
-            pawn.get_move_options(Board {
+            pawn.get_move_options(&Board {
                 round: 0,
                 figures: vec![]
             }),
@@ -462,7 +461,7 @@ mod tests {
             killable: vec![],
         };
         assert_eq!(
-            pawn.get_move_options(Board {
+            pawn.get_move_options(&Board {
                 figures: vec![],
                 round: 1
             }),
