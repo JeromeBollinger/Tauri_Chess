@@ -6,6 +6,7 @@ var rect_length = canvas_length / 8;
 
 let global_figureShapes = [];
 let global_optionShapes = [];
+let global_killShapes = [];
 let figureId;
 
 window.addEventListener("load", () => {
@@ -34,6 +35,7 @@ canva.addEventListener('click', e => {
     return;
   })
   if(global_optionShapes === null) return;
+
   global_optionShapes.some((optionShape) => {
     if (canvas.isPointInPath(optionShape.shape, e.offsetX, e.offsetY)) {
       console.log("figure with id "+ figureId + " moved to " + optionShape.object.x + "," + optionShape.object.y)
@@ -94,7 +96,7 @@ function drawFigure(figure) {
 }
 
 function drawOptions(options) {
-  var optionShapes = [];
+  let optionShapes = [];
   options.forEach((option) => {
     optionShapes.push(drawOption(option));
   });
@@ -110,12 +112,30 @@ function drawOption(option) {
   return { "shape": circle, "object": option };
 }
 
+function drawKillables(options) {
+  let optionShapes = [];
+  options.forEach((option) => {
+    optionShapes.push(drawKillable(option));
+  });
+  return optionShapes;
+}
+
+function drawKillable(option) {
+  let canvas = canva.getContext("2d");
+  canvas.fillStyle = "red"
+  let circle = new Path2D();
+  circle.arc(option.x * rect_length + rect_length / 2, option.y * rect_length + rect_length / 2, rect_length / 5, 0, 2 * Math.PI);
+  canvas.fill(circle);
+  return { "shape": circle, "object": option };
+}
+
 function clearBoard() {
   canva.getContext("2d").clearRect(0, 0, canva.width, canva.height);
 }
 
 function clearShapes() {
-  global_figureShapes = []
+  global_figureShapes = [];
+  global_killShapes = [];
 }
 
 function redrawBoard() {
