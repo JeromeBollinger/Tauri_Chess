@@ -28,8 +28,8 @@ async function getBoard() {
   return figures;
 }
 
-let figureShapes = [];
-let optionShapes = [];
+let global_figureShapes = [];
+let global_optionShapes = [];
 let figureId;
 
 window.addEventListener("load", () => {
@@ -45,13 +45,13 @@ canva.addEventListener('click', e => {
   let canvas = canva.getContext("2d");
 
   let clicked_on_figure = false;
-  figureShapes.some((figureShape) => {
+  global_figureShapes.some((figureShape) => {
     if (canvas.isPointInPath(figureShape.shape, e.offsetX, e.offsetY)) {
       console.log(figureShape.object)
       figureId = figureShape.object.id;
       getOptions(figureId).then(
         options => {
-          optionShapes = drawOptions(options.movable)
+          global_optionShapes = drawOptions(options.movable)
           clicked_on_figure = true;
         }
       ).catch(error =>
@@ -60,13 +60,13 @@ canva.addEventListener('click', e => {
     }
     return;
   })
-  optionShapes.some((optionShape) => {
+  global_optionShapes.some((optionShape) => {
     if (canvas.isPointInPath(optionShape.shape, e.offsetX, e.offsetY)) {
-      console.log(optionShape.object);
-      console.log(figureId);
+      console.log("figure with id "+ figureId + " moved to " + optionShape.object.x + "," + optionShape.object.y)
       setPosition(optionShape.object, figureId).then(
         a => {
           console.log(a);
+          global_optionShapes = {};
     }).catch(error =>
       console.log(error, "could not set figure ")
     );
@@ -85,7 +85,7 @@ async function setPosition(object, figureId) {
 
 function drawFigures(board) {
   board.figures.forEach((figure) => {
-    figureShapes.push(drawFigure(figure));
+    global_figureShapes.push(drawFigure(figure));
   });
 }
 
@@ -127,7 +127,7 @@ function clearBoard() {
 }
 
 function clearShapes() {
-  figureShapes = []
+  global_figureShapes = []
 }
 
 function redrawBoard() {
