@@ -25,13 +25,14 @@ fn get_board(game: State<Game>) -> Board {
 #[tauri::command]
 fn get_options(game: State<Game>, figure_id: i32) -> Option<MoveOptions> {
     let board = game.board.lock().unwrap();
-    let figure = board.get_figure_from_id(figure_id).unwrap();
-    if is_figures_turn(figure.white, board.round) {
-        return Some(
-            figure
-                .get_move_options(&board)
-                .remove_out_of_bounds_options(),
-        );
+    if let Some(figure) = board.get_figure_from_id(figure_id) {
+        if is_figures_turn(figure.white, board.round) {
+            return Some(
+                figure
+                    .get_move_options(&board)
+                    .remove_out_of_bounds_options(),
+            );
+        }
     }
     None
 }
@@ -40,7 +41,9 @@ fn get_options(game: State<Game>, figure_id: i32) -> Option<MoveOptions> {
 fn set_position_of_at(game: State<Game>, figure_id: i32, x: i32, y: i32) {
     let mut board = game.board.lock().unwrap();
     if let Some(target) = board.get_figure_from_position_mut(Position::new(x, y)) {
-        target.alive = false;
+        if target.alive {
+            target.alive = false;
+        }
     }
     let figure = board.get_figure_from_id_mut(figure_id).unwrap();
     figure.set_position(x, y);
@@ -397,7 +400,7 @@ impl Board {
     fn occupied_by(&self, position: Position) -> Option<&Figure> {
         self.figures
             .iter()
-            .find(|&figure| figure.position == position)
+            .find(|&figure| figure.position == position && figure.alive)
     }
     fn init() -> Board {
         let mut fig: Vec<Figure> = vec![
@@ -441,15 +444,19 @@ impl Board {
     }
 
     fn get_figure_from_id(&self, id: i32) -> Option<&Figure> {
-        self.figures.iter().find(|figure| figure.id == id)
+        self.figures
+            .iter()
+            .find(|figure| figure.id == id && figure.alive)
     }
     fn get_figure_from_id_mut(&mut self, id: i32) -> Option<&mut Figure> {
-        self.figures.iter_mut().find(|figure| figure.id == id)
+        self.figures
+            .iter_mut()
+            .find(|figure| figure.id == id && figure.alive)
     }
     fn get_figure_from_position_mut(&mut self, position: Position) -> Option<&mut Figure> {
         self.figures
             .iter_mut()
-            .find(|figure| figure.position == position)
+            .find(|figure| figure.position == position && figure.alive)
     }
 }
 
