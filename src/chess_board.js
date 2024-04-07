@@ -100,15 +100,9 @@ function drawFigures(board) {
 }
 
 function drawFigure(figure) {
+  let color = figure.white ? "#FFDAB9" : "#8B5742";
+  let circle = drawCircle(color, figure.position.x, figure.position.y, rect_length / 2.5);
   let canvas = canva.getContext("2d");
-  if (figure.white) {
-    canvas.fillStyle = "#FFDAB9";
-  } else {
-    canvas.fillStyle = "#8B5742";
-  }
-  let circle = new Path2D();
-  circle.arc(figure.position.x * rect_length + rect_length / 2, figure.position.y * rect_length + rect_length / 2, rect_length / 2.5, 0, 2 * Math.PI);
-  canvas.fill(circle);
   canvas.fillStyle = "black"
   canvas.font = "12px serif";
   canvas.fillText(figure.kind, figure.position.x * rect_length + rect_length / 4, figure.position.y * rect_length + rect_length / 2 + 5);
