@@ -27,7 +27,11 @@ fn get_options(game: State<Game>, figure_id: i32) -> Option<MoveOptions> {
     let board = game.board.lock().unwrap();
     let figure = board.get_figure_from_id(figure_id).unwrap();
     if is_figures_turn(figure.white, board.round) {
-       return Some(figure.get_move_options(&board).remove_out_of_bounds_options());
+        return Some(
+            figure
+                .get_move_options(&board)
+                .remove_out_of_bounds_options(),
+        );
     }
     None
 }
@@ -35,7 +39,7 @@ fn get_options(game: State<Game>, figure_id: i32) -> Option<MoveOptions> {
 #[tauri::command]
 fn set_position_of_at(game: State<Game>, figure_id: i32, x: i32, y: i32) {
     let mut board = game.board.lock().unwrap();
-    if let Some(target) = board.get_figure_from_position_mut(Position::new(x, y)){
+    if let Some(target) = board.get_figure_from_position_mut(Position::new(x, y)) {
         target.alive = false;
     }
     let figure = board.get_figure_from_id_mut(figure_id).unwrap();
@@ -443,7 +447,9 @@ impl Board {
         self.figures.iter_mut().find(|figure| figure.id == id)
     }
     fn get_figure_from_position_mut(&mut self, position: Position) -> Option<&mut Figure> {
-        self.figures.iter_mut().find(|figure| figure.position == position)
+        self.figures
+            .iter_mut()
+            .find(|figure| figure.position == position)
     }
 }
 
@@ -510,7 +516,7 @@ mod tests {
         assert_eq!(raw_options.remove_out_of_bounds_options(), inbound_options);
     }
 
-        #[test]
+    #[test]
     fn is_turn_of() {
         let white = true;
         let black = false;
