@@ -15,8 +15,22 @@ window.addEventListener("load", () => {
 
 canva.addEventListener('click', e => {
   let canvas = canva.getContext("2d");
-
   let clicked_on_figure = false;
+
+  global_killShapes.some((killShape) => {
+    if (canvas.isPointInPath(killShape.shape, e.offsetX, e.offsetY)) {
+      console.log("figure with id "+ figureId + " moves_to " + killShape.object.x + "," + killShape.object.y)
+      setPosition(killShape.object, figureId).then(
+        a => {
+          console.log(a);
+          global_optionShapes = null;
+    }).catch(error =>
+      console.log(error, "could not set figure ")
+    );
+    }
+    return;
+  })
+
   global_figureShapes.some((figureShape) => {
     if (canvas.isPointInPath(figureShape.shape, e.offsetX, e.offsetY)) {
       redrawBoard();
@@ -36,7 +50,7 @@ canva.addEventListener('click', e => {
     }
     return;
   })
-  if(global_optionShapes === null) return;
+  if(global_optionShapes === null && global_killShapes === null) return;
 
   global_optionShapes.some((optionShape) => {
     if (canvas.isPointInPath(optionShape.shape, e.offsetX, e.offsetY)) {
@@ -51,6 +65,8 @@ canva.addEventListener('click', e => {
     }
     return;
   })
+
+
   if (!clicked_on_figure) {
     redrawBoard();
   }
@@ -77,7 +93,9 @@ async function setPosition(object, figureId) {
 // Drawing to canvas
 function drawFigures(board) {
   board.figures.forEach((figure) => {
-    global_figureShapes.push(drawFigure(figure));
+    if (figure.alive){
+      global_figureShapes.push(drawFigure(figure));
+    }
   });
 }
 
