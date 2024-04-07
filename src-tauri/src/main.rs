@@ -26,7 +26,7 @@ fn get_board(game: State<Game>) -> Board {
 fn get_options(game: State<Game>, figure_id: i32) -> Option<MoveOptions> {
     let board = game.board.lock().unwrap();
     let figure = board.get_figure_from_id(figure_id).unwrap();
-    if figure.white == (board.round % 2 == 0) {
+    if is_figures_turn(figure.white, board.round) {
        return Some(figure.get_move_options(&board).remove_out_of_bounds_options());
     }
     None
@@ -53,6 +53,10 @@ fn main() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+fn is_figures_turn(white: bool, round: i32) -> bool {
+    white == (round % 2 == 0)
 }
 
 #[derive(Serialize, Clone, PartialEq)]
@@ -498,5 +502,15 @@ mod tests {
             killable: vec![],
         };
         assert_eq!(raw_options.remove_out_of_bounds_options(), inbound_options);
+    }
+
+        #[test]
+    fn is_turn_of() {
+        let white = true;
+        let black = false;
+        assert_eq!(is_figures_turn(white, 0), true);
+        assert_eq!(is_figures_turn(black, 0), false);
+        assert_eq!(is_figures_turn(white, 1), false);
+        assert_eq!(is_figures_turn(black, 1), true);
     }
 }
