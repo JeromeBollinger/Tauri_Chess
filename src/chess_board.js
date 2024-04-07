@@ -50,7 +50,7 @@ canva.addEventListener('click', e => {
     }
     return;
   })
-  if(global_optionShapes === null && global_killShapes === null) return;
+  if(global_optionShapes === null) return;
 
   global_optionShapes.some((optionShape) => {
     if (canvas.isPointInPath(optionShape.shape, e.offsetX, e.offsetY)) {
