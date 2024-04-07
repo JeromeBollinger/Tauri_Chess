@@ -386,7 +386,9 @@ struct Board {
 
 impl Board {
     fn occupied_by(&self, position: Position) -> Option<&Figure> {
-        self.figures.iter().find(|&figure| figure.position == position)
+        self.figures
+            .iter()
+            .find(|&figure| figure.position == position)
     }
     fn init() -> Board {
         let mut fig: Vec<Figure> = vec![
