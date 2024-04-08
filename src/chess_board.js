@@ -4,89 +4,42 @@ const canva = document.getElementById("board");
 var canvas_length = window.screen.height / 2;
 var rect_length = canvas_length / 8;
 
-let global_figureShapes = [];
-let global_optionShapes = [];
-let global_killShapes = [];
-let figureId;
-
 window.addEventListener("load", () => {
   redrawBoard()
 });
 
 canva.addEventListener('click', e => {
-  let canvas = canva.getContext("2d");
-  let clicked_on_figure = false;
+  let position = { 'x': Math.floor(e.offsetX / rect_length), 'y': Math.floor(e.offsetY / rect_length) }
 
-  global_killShapes.some((killShape) => {
-    if (canvas.isPointInPath(killShape.shape, e.offsetX, e.offsetY)) {
-      console.log("figure with id "+ figureId + " moves_to " + killShape.object.x + "," + killShape.object.y)
-      setPosition(killShape.object, figureId).then(
-        a => {
-          console.log(a);
-          global_optionShapes = null;
-    }).catch(error =>
-      console.log(error, "could not set figure ")
-    );
-    }
-    return;
-  })
-
-  global_figureShapes.some((figureShape) => {
-    if (canvas.isPointInPath(figureShape.shape, e.offsetX, e.offsetY)) {
-      redrawBoard();
-      clicked_on_figure = true;
-      console.log(figureShape.object)
-      figureId = figureShape.object.id;
-      getOptions(figureId).then(
+  positionInteraction(position).then(
+    _ => {})
+  redrawBoard();
+      getOptions(position).then(
         options => {
-          if(options !== null){
-            global_optionShapes = drawOptions(options.movable, "orange")
-            global_killShapes = drawOptions(options.killable, "red")
+          if (options !== null) {
+            drawOptions(options.movable, "orange")
+            drawOptions(options.killable, "red")
           }
         }
       ).catch(error =>
         console.log(error, "could not fetch options or not correct turn")
       );
-    }
-    return;
-  })
-  if(global_optionShapes === null) return;
-
-  global_optionShapes.some((optionShape) => {
-    if (canvas.isPointInPath(optionShape.shape, e.offsetX, e.offsetY)) {
-      console.log("figure with id "+ figureId + " moved to " + optionShape.object.x + "," + optionShape.object.y)
-      setPosition(optionShape.object, figureId).then(
-        a => {
-          console.log(a);
-          global_optionShapes = null;
-    }).catch(error =>
-      console.log(error, "could not set figure ")
-    );
-    }
-    return;
-  })
-
-
-  if (!clicked_on_figure) {
-    redrawBoard();
-  }
 })
 
-
 // Rust invokes
+async function positionInteraction(position){
+  let c = await invoke("position_interaction", position);
+  return c;
+}
+
 async function getBoard() {
   let figures = await invoke("get_board");
   return figures;
 }
 
-async function getOptions(figureId) {
-  let options = await invoke("get_options", { "figureId": figureId });
+async function getOptions(position) {
+  let options = await invoke("get_options", position);
   return options;
-}
-
-async function setPosition(object, figureId) {
-  invoke("set_position_of_at", {"figureId": figureId, "x": object.x, "y": object.y});
-  return true
 }
 
 
@@ -94,7 +47,7 @@ async function setPosition(object, figureId) {
 function drawFigures(board) {
   board.figures.forEach((figure) => {
     if (figure.alive){
-      global_figureShapes.push(drawFigure(figure));
+      drawFigure(figure);
     }
   });
 }
@@ -121,14 +74,8 @@ function clearBoard() {
   canva.getContext("2d").clearRect(0, 0, canva.width, canva.height);
 }
 
-function clearShapes() {
-  global_figureShapes = [];
-  global_killShapes = [];
-}
-
 function redrawBoard() {
   clearBoard();
-  clearShapes();
   fillBoard();
   getBoard().then(
     board => {

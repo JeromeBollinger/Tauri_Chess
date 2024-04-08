@@ -6,14 +6,49 @@ use std::sync::Mutex;
 use tauri::State;
 
 #[tauri::command]
-fn set_player_color(game: State<Game>, white: bool) {
-    let mut p = game.player.lock().unwrap();
-    p.white = white;
+fn position_interaction(game: State<Game>, x: i32, y: i32) {
+    let mut board = game.board.lock().unwrap();
+    let board_clone = &board.clone();
+    let last_interacted_position = &board.last_interacted_position.clone();
+    match last_interacted_position {
+        Some(last_pos) => {
+            let figure_option = board
+                .get_figure_from_position(last_pos.clone())
+                .unwrap()
+                .get_move_options(board_clone);
+            if figure_option.movable.contains(&Position::new(x, y)) {
+                board
+                    .get_figure_from_position_mut(*last_pos)
+                    .unwrap()
+                    .set_position(x, y);
+                board.round +=1;
+            } else if figure_option.killable.contains(&Position::new(x, y)) {
+                board
+                    .get_figure_from_position_mut(Position::new(x, y))
+                    .unwrap()
+                    .alive = false;
+                board
+                    .get_figure_from_position_mut(*last_pos)
+                    .unwrap()
+                    .set_position(x, y);
+                board.round +=1;
+            }
+            board.last_interacted_position = None;
+        }
+        None => {
+            if let Some(figure_color) = board.get_figure_from_position_mut(Position::new(x, y)) {
+                if is_figures_turn(figure_color.white, board.round) {
+                    board.last_interacted_position = Some(Position::new(x, y))
+                }
+            }
+        }
+    }
 }
 
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+fn set_player_color(game: State<Game>, white: bool) {
+    let mut p = game.player.lock().unwrap();
+    p.white = white;
 }
 
 #[tauri::command]
@@ -23,9 +58,9 @@ fn get_board(game: State<Game>) -> Board {
 }
 
 #[tauri::command]
-fn get_options(game: State<Game>, figure_id: i32) -> Option<MoveOptions> {
+fn get_options(game: State<Game>, x: i32, y: i32) -> Option<MoveOptions> {
     let board = game.board.lock().unwrap();
-    if let Some(figure) = board.get_figure_from_id(figure_id) {
+    if let Some(figure) = board.get_figure_from_position(Position::new(x, y)) {
         if is_figures_turn(figure.white, board.round) {
             return Some(
                 figure
@@ -37,29 +72,14 @@ fn get_options(game: State<Game>, figure_id: i32) -> Option<MoveOptions> {
     None
 }
 
-#[tauri::command]
-fn set_position_of_at(game: State<Game>, figure_id: i32, x: i32, y: i32) {
-    let mut board = game.board.lock().unwrap();
-    if let Some(target) = board.get_figure_from_position_mut(Position::new(x, y)) {
-        if target.alive {
-            target.alive = false;
-        }
-    }
-    let figure = board.get_figure_from_id_mut(figure_id).unwrap();
-    figure.set_position(x, y);
-    figure.first_move = false;
-    board.round += 1;
-}
-
 fn main() {
     tauri::Builder::default()
         .manage(Game::init())
         .invoke_handler(tauri::generate_handler![
-            greet,
             get_board,
             get_options,
             set_player_color,
-            set_position_of_at,
+            position_interaction,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -325,18 +345,16 @@ struct Figure {
     position: Position,
     white: bool,
     alive: bool,
-    id: i32,
     first_move: bool,
 }
 
 impl Figure {
-    fn new(kind: FigureType, position: Position, white: bool, id: i32, first_move: bool) -> Figure {
+    fn new(kind: FigureType, position: Position, white: bool, first_move: bool) -> Figure {
         Figure {
             kind,
             position,
             white,
             alive: true,
-            id,
             first_move,
         }
     }
@@ -394,6 +412,7 @@ impl Game {
 struct Board {
     figures: Vec<Figure>,
     round: i32,
+    last_interacted_position: Option<Position>,
 }
 
 impl Board {
@@ -404,58 +423,53 @@ impl Board {
     }
     fn init() -> Board {
         let mut fig: Vec<Figure> = vec![
-            Figure::new(FigureType::Rook, Position::new(0, 0), true, 1, true),
-            Figure::new(FigureType::Knight, Position::new(1, 0), true, 2, true),
-            Figure::new(FigureType::Bishop, Position::new(2, 0), true, 3, true),
-            Figure::new(FigureType::Queen, Position::new(3, 0), true, 4, true),
-            Figure::new(FigureType::King, Position::new(4, 0), true, 5, true),
-            Figure::new(FigureType::Bishop, Position::new(5, 0), true, 6, true),
-            Figure::new(FigureType::Knight, Position::new(6, 0), true, 7, true),
-            Figure::new(FigureType::Rook, Position::new(7, 0), true, 8, true),
-            Figure::new(FigureType::Rook, Position::new(0, 7), false, 9, true),
-            Figure::new(FigureType::Knight, Position::new(1, 7), false, 10, true),
-            Figure::new(FigureType::Bishop, Position::new(2, 7), false, 11, true),
-            Figure::new(FigureType::Queen, Position::new(3, 7), false, 12, true),
-            Figure::new(FigureType::King, Position::new(4, 7), false, 13, true),
-            Figure::new(FigureType::Bishop, Position::new(5, 7), false, 14, true),
-            Figure::new(FigureType::Knight, Position::new(6, 7), false, 15, true),
-            Figure::new(FigureType::Rook, Position::new(7, 7), false, 16, true),
+            Figure::new(FigureType::Rook, Position::new(0, 0), true, true),
+            Figure::new(FigureType::Knight, Position::new(1, 0), true, true),
+            Figure::new(FigureType::Bishop, Position::new(2, 0), true, true),
+            Figure::new(FigureType::Queen, Position::new(3, 0), true, true),
+            Figure::new(FigureType::King, Position::new(4, 0), true, true),
+            Figure::new(FigureType::Bishop, Position::new(5, 0), true, true),
+            Figure::new(FigureType::Knight, Position::new(6, 0), true, true),
+            Figure::new(FigureType::Rook, Position::new(7, 0), true, true),
+            Figure::new(FigureType::Rook, Position::new(0, 7), false, true),
+            Figure::new(FigureType::Knight, Position::new(1, 7), false, true),
+            Figure::new(FigureType::Bishop, Position::new(2, 7), false, true),
+            Figure::new(FigureType::Queen, Position::new(3, 7), false, true),
+            Figure::new(FigureType::King, Position::new(4, 7), false, true),
+            Figure::new(FigureType::Bishop, Position::new(5, 7), false, true),
+            Figure::new(FigureType::Knight, Position::new(6, 7), false, true),
+            Figure::new(FigureType::Rook, Position::new(7, 7), false, true),
         ];
         for i in 0..8 {
             fig.push(Figure::new(
                 FigureType::Pawn,
                 Position::new(i, 1),
                 true,
-                i + 17,
                 true,
             ));
             fig.push(Figure::new(
                 FigureType::Pawn,
                 Position::new(i, 6),
                 false,
-                i + 25,
                 true,
             ));
         }
         Board {
             round: 0,
             figures: fig,
+            last_interacted_position: None,
         }
     }
 
-    fn get_figure_from_id(&self, id: i32) -> Option<&Figure> {
-        self.figures
-            .iter()
-            .find(|figure| figure.id == id && figure.alive)
-    }
-    fn get_figure_from_id_mut(&mut self, id: i32) -> Option<&mut Figure> {
-        self.figures
-            .iter_mut()
-            .find(|figure| figure.id == id && figure.alive)
-    }
     fn get_figure_from_position_mut(&mut self, position: Position) -> Option<&mut Figure> {
         self.figures
             .iter_mut()
+            .find(|figure| figure.position == position && figure.alive)
+    }
+
+    fn get_figure_from_position(&self, position: Position) -> Option<&Figure> {
+        self.figures
+            .iter()
             .find(|figure| figure.position == position && figure.alive)
     }
 }
@@ -466,7 +480,7 @@ mod tests {
 
     #[test]
     fn pawn_test() {
-        let pawn = Figure::new(FigureType::Pawn, Position::new(4, 4), true, 1, true);
+        let pawn = Figure::new(FigureType::Pawn, Position::new(4, 4), true, true);
         let raw_options = MoveOptions {
             movable: vec![Position::new(4, 5), Position::new(4, 6)],
             killable: vec![],
@@ -474,11 +488,12 @@ mod tests {
         assert_eq!(
             pawn.get_move_options(&Board {
                 round: 0,
-                figures: vec![]
+                figures: vec![],
+                last_interacted_position: None,
             }),
             raw_options
         );
-        let pawn = Figure::new(FigureType::Pawn, Position::new(4, 4), true, 1, false);
+        let pawn = Figure::new(FigureType::Pawn, Position::new(4, 4), true, false);
         let raw_options = MoveOptions {
             movable: vec![Position::new(4, 5)],
             killable: vec![],
@@ -486,7 +501,8 @@ mod tests {
         assert_eq!(
             pawn.get_move_options(&Board {
                 figures: vec![],
-                round: 1
+                round: 1,
+                last_interacted_position: None,
             }),
             raw_options
         );
