@@ -32,12 +32,14 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
+        working-directory: ./src-tauri
 
       - name: Cargo build
         uses: actions-rs/cargo@v1
         with:
           command: build
           args: --release
+        working-directory: ./src-tauri
 
       - name: Node v16
         uses: actions/setup-node@v2
