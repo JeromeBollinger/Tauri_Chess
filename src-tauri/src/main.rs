@@ -417,6 +417,20 @@ struct Board {
 }
 
 impl Board {
+    fn position_threatened_from(&self, figure: &Figure) -> Vec<Position> {
+        self.figures
+            .iter()
+            .filter(|pt| pt.white != figure.white && pt.alive)
+            .filter_map(|pt| {
+                pt.get_move_options(self)
+                    .killable
+                    .iter()
+                    .find(|&&k_pos| k_pos == figure.position)
+                    .map(|_| pt.position)
+            })
+            .collect()
+    }
+
     fn occupied_by(&self, position: Position) -> Option<&Figure> {
         self.figures
             .iter()
@@ -478,6 +492,34 @@ impl Board {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_is_check() {
+        let queen = Figure::new(FigureType::Queen, Position::new(4, 4), true, true);
+        let king = Figure::new(FigureType::King, Position::new(6, 4), false, true);
+        let board = Board {
+            figures: vec![queen.clone(), king.clone()],
+            round: 0,
+            last_interacted_position: None,
+        };
+        assert_eq!(board.position_threatened_from(&king), vec![queen.position]);
+
+        let board = Board {
+            figures: vec![king.clone()],
+            round: 0,
+            last_interacted_position: None,
+        };
+        assert_eq!(board.position_threatened_from(&king), vec![]);
+
+        let queen = Figure::new(FigureType::Queen, Position::new(4, 4), false, true);
+        let king = Figure::new(FigureType::King, Position::new(6, 4), false, true);
+        let board = Board {
+            figures: vec![queen.clone(), king.clone()],
+            round: 0,
+            last_interacted_position: None,
+        };
+        assert_eq!(board.position_threatened_from(&king), vec![]);
+    }
 
     #[test]
     fn pawn_test() {
