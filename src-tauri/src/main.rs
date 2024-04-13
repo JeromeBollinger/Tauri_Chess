@@ -21,7 +21,7 @@ fn position_interaction(game: State<Game>, x: i32, y: i32) {
                     .get_figure_from_position_mut(*last_pos)
                     .unwrap()
                     .set_position(x, y);
-                board.round +=1;
+                board.round += 1;
             } else if figure_option.killable.contains(&Position::new(x, y)) {
                 board
                     .get_figure_from_position_mut(Position::new(x, y))
@@ -31,7 +31,7 @@ fn position_interaction(game: State<Game>, x: i32, y: i32) {
                     .get_figure_from_position_mut(*last_pos)
                     .unwrap()
                     .set_position(x, y);
-                board.round +=1;
+                board.round += 1;
             }
             board.last_interacted_position = None;
         }
@@ -103,6 +103,7 @@ impl Figure {
     fn set_position(&mut self, x: i32, y: i32) {
         self.position.x = x;
         self.position.y = y;
+        self.first_move = false;
     }
     fn get_move_options(&self, board: &Board) -> MoveOptions {
         match &self.kind {
@@ -113,27 +114,27 @@ impl Figure {
                 // Movable position if free in front
                 let p = Position::new(self.position.x, self.position.y + direction);
                 if board.occupied_by(p).is_none() {
-                    movable.push(p)
-                }
-                // Movable position if free in front and first move
-                if self.first_move {
-                    let p = Position::new(self.position.x, self.position.y + 2 * direction);
-                    if board.occupied_by(p).is_none() {
-                        movable.push(p)
+                    movable.push(p);
+                    // Movable position if free in front and first move
+                    if self.first_move {
+                        let p = Position::new(self.position.x, self.position.y + 2 * direction);
+                        if board.occupied_by(p).is_none() {
+                            movable.push(p);
+                        }
                     }
                 }
                 // Killable positions diagonal left
                 let p = Position::new(self.position.x + 1, self.position.y + direction);
                 if let Some(f) = board.occupied_by(p) {
                     if f.white != self.white {
-                        killable.push(p)
+                        killable.push(p);
                     }
                 }
                 // Killable positions diagonal right
                 let p = Position::new(self.position.x - 1, self.position.y + direction);
                 if let Some(f) = board.occupied_by(p) {
                     if f.white != self.white {
-                        killable.push(p)
+                        killable.push(p);
                     }
                 }
                 // TODO: En passant
