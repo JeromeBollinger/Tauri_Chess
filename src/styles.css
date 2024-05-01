@@ -114,3 +114,7 @@ button {
   font-weight: 500;
   font-family: inherit;
 }
+
+.hidden {
+  display: none;
+}

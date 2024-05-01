@@ -1,14 +1,34 @@
 const { invoke } = window.__TAURI__.tauri;
-const canva = document.getElementById("board");
+var canva = document.getElementById("board");
+var canva2 = document.getElementById("board2");
 
 var canvas_length = window.screen.height / 2;
 var rect_length = canvas_length / 8;
+var first_canva = true;
 
 window.addEventListener("load", () => {
   redrawBoard()
 });
 
 canva.addEventListener('click', e => {
+  let position = { 'x': Math.floor(e.offsetX / rect_length), 'y': Math.floor(e.offsetY / rect_length) }
+
+  positionInteraction(position).then(
+    _ => {})
+  redrawBoard();
+      getOptions(position).then(
+        options => {
+          if (options !== null) {
+            drawOptions(options.movable, "orange")
+            drawOptions(options.killable, "red")
+          }
+        }
+      ).catch(error =>
+        console.log(error, "could not fetch options or not correct turn")
+      );
+})
+
+canva2.addEventListener('click', e => {
   let position = { 'x': Math.floor(e.offsetX / rect_length), 'y': Math.floor(e.offsetY / rect_length) }
 
   positionInteraction(position).then(
@@ -71,11 +91,13 @@ function drawOptions(options, color) {
 }
 
 function clearBoard() {
-  canva.getContext("2d").clearRect(0, 0, canva.width, canva.height);
+  canva2.getContext("2d").clearRect(0, 0, canva.width, canva.height);
 }
 
 function redrawBoard() {
-  clearBoard();
+  var c = canva;
+  canva = canva2;
+  canva2 = c;
   fillBoard();
   getBoard().then(
     board => {
@@ -83,6 +105,9 @@ function redrawBoard() {
     }).catch(error =>
       console.log(error, "could not fetch board!!! ")
     )
+  canva.classList.remove("hidden");
+  canva2.classList.add("hidden");
+  clearBoard();
 }
 
 function fillBoard() {
